@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SearchingALgorithms
+namespace SearchingAlgorithms
 {
 
     #region Astar code
