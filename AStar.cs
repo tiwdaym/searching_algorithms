@@ -18,7 +18,7 @@ namespace SearchingALgorithms
         /// <param name="state">State to compute distance to.</param>
         /// <param name="param">Optional parameters to give for heuristical function.</param>
         /// <returns>Estimated distance to given graphState as integer. Use 0 if graphState is equal to given graphState.</returns>
-        int getHeuristicDistance(TState state, int param = null);
+        int getHeuristicDistance(TState state, int param = 0);
     }
 
     /// <summary>
@@ -33,11 +33,11 @@ namespace SearchingALgorithms
         /// </summary>
         /// <param name="operation">Operation to perform on current graphState.</param>
         /// <returns>New graphState, or null, if operation is invalid, or cannot be performed.</returns>
-        TState generate(string operation);
+        TState generate(int operation);
 
         /// <summary>
         /// Function is used to provide list of possible operations.
-        /// Needed for graphState generation.
+        /// Needed for graphState generation. 
         /// </summary>
         /// <returns>List of operations usable in function "generate".</returns>
         int[] getOperations();
@@ -92,7 +92,7 @@ namespace SearchingALgorithms
             public int heuristicParamUsed;
             public TimeSpan totalTimeTaken;
 
-            public PathResult(TState[] foundPath = null, string[] nextStateStep = null, int pathLength = 0, int searchedNodes = 0, int generatedNodes = 0, int generatedUniqueNodes = 0, int maximumUsedHeapMemory = 0, int maximumUsedHashMemory = 0)
+            public PathResult(TState[] foundPath = null, int[] nextStateStep = null, int pathLength = 0, int searchedNodes = 0, int generatedNodes = 0, int generatedUniqueNodes = 0, int maximumUsedHeapMemory = 0, int maximumUsedHashMemory = 0)
             {
                 this.foundPathStates = foundPath;
                 this.foundPathOperations = nextStateStep;
@@ -521,7 +521,7 @@ namespace SearchingALgorithms
         /// <summary>
         /// Parameter passed to heuristic function. Optional.
         /// </summary>
-        public string HeuristicParam
+        public int HeuristicParam
         {
             get { return heuristicParam; }
             set { heuristicParam = value; }
@@ -622,11 +622,11 @@ namespace SearchingALgorithms
                         foundOperationsPath[i] = this.operationsList[currentGraphState.lastMove];
                         currentGraphState = currentGraphState.graphParent;
                     }
-                    //first state was starting and we dont know which move user used to create such a state. So we are using null.
+                    //first state was starting and we dont know which move user used to create such a state. So we are using -1 as undefined.
                     //Or we can try to think a little and create some super Intelligent Intelligence that can guess with 100% precision
                     //which move author used to create such a state in which this state now is. Maybe somewhere in future...
                     foundStatesPath[0] = currentGraphState.actualState;
-                    foundOperationsPath[0] = null;
+                    foundOperationsPath[0] = -1;
 
                     pathResult.foundPathStates = foundStatesPath;
                     pathResult.pathLength = foundOperationsPath.Length;
