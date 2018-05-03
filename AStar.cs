@@ -15,7 +15,7 @@ public interface Heuristical<TState>
     /// <param name="state">State to compute distance to.</param>
     /// <param name="param">Optional parameters to give for heuristical function.</param>
     /// <returns>Estimated distance to given graphState as integer. Use 0 if graphState is equal to given graphState.</returns>
-    int getHeuristicDistance(TState state, string param = null);
+    int getHeuristicDistance(TState state, int param = null);
 }
 
 /// <summary>
@@ -37,21 +37,14 @@ public interface Generative<TState>
     /// Needed for graphState generation.
     /// </summary>
     /// <returns>List of operations usable in function "generate".</returns>
-    string[] getOperations();
+    int[] getOperations();
 
     /// <summary>
     /// Function is used to generate hash from actual TState.
-    /// Hash needs to be in uint.
+    /// Hash needs to be in uint. Beware using GetHashCode as it usually returns only reference to class.
     /// </summary>
     /// <returns>hash graphState of TState</returns>
     uint getHash();
-
-    /// <summary>
-    /// Function will check for equality of current TState with given graphState.
-    /// </summary>
-    /// <param name="">State to compare current TState with</param>
-    /// <returns>Return true, if states are equal, false otherwise.</returns>
-    bool isEqual(TState state);
 }
 #endregion
 
@@ -72,21 +65,21 @@ public class AStar<TState>
     /// Class, where resulting path is stored.
     /// Path of states is stored in "foundPathStates" array from 0 to pathLength-1
     /// Steps are stored in string array "foundPathOperations" where at 0 index is null, cause we really dont know,
-    /// whatkind o trick or operation user made to get to this state. As of others indexes,
+    /// what kind of trick or operation user made to get to this state. As of others indexes,
     /// there is operation that was used to get to state on same index of TState. For example at index 1 is operation that
     /// was used to get to TState at index 1 from TState at index 0.
     /// </summary>
     public class PathResult
     {
         public TState[] foundPathStates; //states
-        public string[] foundPathOperations; //operations
+        public int[] foundPathOperations; //operations
         public int pathLength;
         public int searchedNodes;
         public int generatedNodes;
         public int generatedUniqueNodes;
         public int maximumUsedHeapMemory;
         public int maximumUsedHashMemory;
-        public string heuristicParamUsed;
+        public int heuristicParamUsed;
         public TimeSpan totalTimeTaken;
 
         public PathResult(TState[] foundPath = null, string[] nextStateStep = null, int pathLength = 0, int searchedNodes = 0, int generatedNodes = 0, int generatedUniqueNodes = 0, int maximumUsedHeapMemory = 0, int maximumUsedHashMemory = 0)
@@ -167,20 +160,25 @@ public class AStar<TState>
     /// </summary>
     private class HashList
     {
+        public const int DEFAULT_HASHTABLE_SIZE = 65536;
+        public const int DEFAULT_MAX_ELEMENTS = 65536;
+
         private HashData[] hashTable; //hashes for puzzle states
-        private int hashTableSize; //hash size in number of elements
-        public int elementsCount; //number of elements in hash
+        private int hashTableSize; //size of hashTable array to create
+        private int maxElementsCount; //hash size in number of elements
+        public int count; //actual number of elements in hash
 
         /// <summary>
-        /// Constructor will create hash table with defined size. Default is 65536.
+        /// Constructor will create hash table.
         /// </summary>
-        /// <param name="hashTableSize">Number of unchained elements in hash table. This size can be bigger if there are collisions.</param>
-        public HashList(int hashTableSize = 65536)
+        /// <param name="hashTableSize">Size of hashTable to use for storing Hashed elements.</param>
+        /// <param name="maxElementsCount">Maximum number of elements in hash table.</param>
+        public HashList(int hashTableSize = DEFAULT_HASHTABLE_SIZE, int maxElementsCount = DEFAULT_MAX_ELEMENTS)
         {
-            this.hashTableSize = hashTableSize;
-            this.hashTable = new HashData[this.hashTableSize];
+            this.maxElementsCount = maxElementsCount;
+            this.hashTable = new HashData[this.maxElementsCount];
             if (this.hashTable == null) throw new System.Exception("hashTable not initialized!\n");
-            this.elementsCount = 0;
+            this.count = 0;
         }
 
         /// <summary>
@@ -198,7 +196,7 @@ public class AStar<TState>
             uint seed = 101;
             int size = string.Length;
             for (int i = 0; i < size; i++) hash = hash * seed + string[i];*/
-            return state.actualState.getHash() % (uint)this.hashTableSize;
+            return state.actualState.getHash() % (uint)this.maxElementsCount;
         }
 
         /// <summary>
@@ -221,7 +219,7 @@ public class AStar<TState>
                 //if no element exist, add new element to hashTable
                 this.hashTable[hash] = new HashData(state, null);
                 if (this.hashTable[hash] == null) throw new System.Exception("Not enough space to create new hashTable element!\n");
-                this.elementsCount++;
+                this.count++;
                 return;
             }
             else
@@ -232,7 +230,7 @@ public class AStar<TState>
 
                 temp.next = new HashData(state, null); //add new element to hash
                 if (temp.next == null) throw new System.Exception("Not enough space to create new hashTable element!\n");
-                this.elementsCount++;
+                this.count++;
                 return;
             }
         }
@@ -254,10 +252,10 @@ public class AStar<TState>
             temp = this.hashTable[hash];
             while (temp.next != null)
             {
-                if (temp.graphState.actualState.isEqual(state.actualState)) return true;
+                if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return true;
                 temp = temp.next;
             }
-            if (temp.graphState.actualState.isEqual(state.actualState)) return true;
+            if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return true;
             return false;
         }
 
@@ -278,10 +276,10 @@ public class AStar<TState>
             temp = this.hashTable[hash];
             while (temp.next != null)
             {
-                if (temp.graphState.actualState.isEqual(state.actualState)) return temp;
+                if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return temp;
                 temp = temp.next;
             }
-            if (temp.graphState.actualState.isEqual(state.actualState)) return temp;
+            if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return temp;
             return null;
         }
 
@@ -305,13 +303,13 @@ public class AStar<TState>
             while (temp.next != null)
             {
                 //if found, remove element
-                if (temp.graphState.actualState.isEqual(currentState.actualState))
+                if (temp.graphState.actualState.getHash() == currentState.actualState.getHash())
                 {
                     if (temp == this.hashTable[hash])
                         this.hashTable[hash] = temp.next;
                     else previous.next = temp.next;
                     temp = null;
-                    this.elementsCount--;
+                    this.count--;
                     return;
                 }
                 previous = temp;
@@ -319,14 +317,14 @@ public class AStar<TState>
             }
 
             //2. check for last element
-            if (temp.graphState.actualState.isEqual(currentState.actualState))
+            if (temp.graphState.actualState.getHash() == currentState.actualState.getHash())
             {
                 if (temp == this.hashTable[hash])
                     this.hashTable[hash] = temp.next;
                 else previous.next = temp.next;
                 previous.next = temp.next;
                 temp = null;
-                this.elementsCount--;
+                this.count--;
                 return;
             }
         }
@@ -338,7 +336,9 @@ public class AStar<TState>
     /// </summary>
     private class HeapList
     {
-        private int heapSize;
+        public const int DEFAULT_MAX_ELEMENTS = 65536;
+
+        private int maxHeapElements;
         public int maxNodeDepth;
         public int count;
         private KeyValuePair[] root;
@@ -347,11 +347,11 @@ public class AStar<TState>
         /// Constructor will create heap array. You can specify number of elements in heap. Default is 65536.
         /// Size doesnt change.
         /// </summary>
-        /// <param name="heapSize">Number of possible elements in heap.</param>
-        public HeapList(int heapSize = 65536)
+        /// <param name="maxHeapElements">Number of possible elements in heap.</param>
+        public HeapList(int maxHeapElements = DEFAULT_MAX_ELEMENTS)
         {
-            this.heapSize = heapSize;
-            this.root = new KeyValuePair[heapSize + 1];
+            this.maxHeapElements = maxHeapElements;
+            this.root = new KeyValuePair[maxHeapElements + 1];
             this.count = 0;
             this.maxNodeDepth = 0;
         }
@@ -364,7 +364,7 @@ public class AStar<TState>
         {
             int iTemp;
             KeyValuePair kTemp;
-            if (this.heapSize <= this.count) throw new Exception("Not enough space to add new element to heap. heapSize: " + this.heapSize);
+            if (this.maxHeapElements <= this.count) throw new Exception("Not enough space to add new element to heap. heapSize: " + this.maxHeapElements);
             this.count++;
             this.root[count] = node;
             iTemp = this.count;
@@ -570,7 +570,7 @@ public class AStar<TState>
         {
             //2.1 special - add maximum used heap and hash size
             if (pathResult.maximumUsedHeapMemory < openNodes.count) pathResult.maximumUsedHeapMemory = openNodes.count;
-            if (pathResult.maximumUsedHashMemory < closedNodes.elementsCount) pathResult.maximumUsedHashMemory = closedNodes.elementsCount;
+            if (pathResult.maximumUsedHashMemory < closedNodes.count) pathResult.maximumUsedHashMemory = closedNodes.count;
 
             //3. select best not-processed graphState
             currentGraphState = openNodes.removeMin().graphState;
