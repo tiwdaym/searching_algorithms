@@ -45,6 +45,13 @@ public interface Generative<TState>
     /// </summary>
     /// <returns>hash graphState of TState</returns>
     uint getHash();
+
+    /// <summary>
+    /// Function will check for equality of current TState with given graphState.
+    /// </summary>
+    /// <param name="">State to compare current TState with</param>
+    /// <returns>Return true, if states are equal, false otherwise.</returns>
+    bool isEqual(TState state);
 }
 #endregion
 
@@ -252,10 +259,10 @@ public class AStar<TState>
             temp = this.hashTable[hash];
             while (temp.next != null)
             {
-                if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return true;
+                if (temp.graphState.actualState.isEqual(state.actualState)) return true;
                 temp = temp.next;
             }
-            if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return true;
+            if (temp.graphState.actualState.isEqual(state.actualState)) return true;
             return false;
         }
 
@@ -276,10 +283,10 @@ public class AStar<TState>
             temp = this.hashTable[hash];
             while (temp.next != null)
             {
-                if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return temp;
+                if (temp.graphState.actualState.isEqual(state.actualState)) return temp;
                 temp = temp.next;
             }
-            if (temp.graphState.actualState.getHash() == state.actualState.getHash()) return temp;
+            if (temp.graphState.actualState.isEqual(state.actualState)) return temp;
             return null;
         }
 
@@ -303,7 +310,7 @@ public class AStar<TState>
             while (temp.next != null)
             {
                 //if found, remove element
-                if (temp.graphState.actualState.getHash() == currentState.actualState.getHash())
+                if (temp.graphState.actualState.isEqual(currentState.actualState))
                 {
                     if (temp == this.hashTable[hash])
                         this.hashTable[hash] = temp.next;
@@ -317,7 +324,7 @@ public class AStar<TState>
             }
 
             //2. check for last element
-            if (temp.graphState.actualState.getHash() == currentState.actualState.getHash())
+            if (temp.graphState.actualState.isEqual(currentState.actualState))
             {
                 if (temp == this.hashTable[hash])
                     this.hashTable[hash] = temp.next;
@@ -455,14 +462,19 @@ public class AStar<TState>
     }
     #endregion
 
-    #region AStar private fields definitions
+    #region AStar fields definitions
+    public const int DEFAULT_HASH_SIZE = 65536;
+    public const int DEFAULT_HASH_MAX_ELEMENTS = 65536;
+    public const int DEFAULT_HEAP_SIZE = 65536;
+
     private int heapSize; //size of heap to use
     private int hashSize; //size of hash to use
-    private string[] operationsList; //list of possible operations to perform with states
+    private int hashMaxElementsCount; //max number of elements in hash
+    private int[] operationsList; //list of possible operations to perform with states
 
     private int maxDepth; //max depth to where to find solutions
     private int maxTime; //maximum time of searching
-    private string heuristicParam; //parameter for heuristic function. Can be changed.
+    private int heuristicParam; //parameter for heuristic function. Can be changed.
     private DateTime startTime; //used for time tracking
 
     /// <summary>
@@ -479,6 +491,12 @@ public class AStar<TState>
     {
         get { return hashSize; }
         set { hashSize = value; }
+    }
+
+    public int HashMaxElementsCount
+    {
+        get { return hashMaxElementsCount; }
+        set { hashMaxElementsCount = value; }
     }
 
     public int HeapSize
@@ -519,14 +537,17 @@ public class AStar<TState>
     /// <param name="generator">This should be valid TState that will be used only once, for generating operations.</param>
     /// <param name="heapSize">Number of elements in heap. This number is leading as to how much memory algorithm will be using.</param>
     /// <param name="hashSize">Size of hash table. This does not determine upper limit, cause hash table can chain elements.</param>
-    /// <param name="maxDepth">Maximum depth to where to generate child nodes (states). Depth is as follows: Child -> child -> child -> root - 3 -> 2 -> 1 -> 0. Use -1 for infinite.</param>
-    /// <param name="maxTime">Maximum time in miliseconds for search performing. Use -1 for infinite.</param>
-    public AStar(TState generator, int heapSize = 65536, int hashSize = 65536, int maxDepth = -1, int maxTime = -1, string heuristicParam = null)
+    /// <param name="hashMaxElementsCount"></param>
+    /// <param name="maxSearchingDepth">Maximum depth to where to generate child nodes (states). Depth is as follows: Child -> child -> child -> root - 3 -> 2 -> 1 -> 0. Use -1 for infinite.</param>
+    /// <param name="maxSearchingTime">Maximum time in miliseconds for search performing. Use -1 for infinite.</param>
+    /// <param name="heuristicParam">Used for heuiristic functions</param>
+    public AStar(TState generator, int heapSize = DEFAULT_HEAP_SIZE, int hashSize = DEFAULT_HASH_SIZE, int hashMaxElementsCount = DEFAULT_HASH_MAX_ELEMENTS, int maxSearchingDepth = -1, int maxSearchingTime = -1, int heuristicParam = 0)
     {
         this.heapSize = heapSize;
         this.hashSize = hashSize;
-        this.maxDepth = maxDepth;
-        this.maxTime = maxTime;
+        this.hashMaxElementsCount = hashMaxElementsCount;
+        this.maxDepth = maxSearchingDepth;
+        this.maxTime = maxSearchingTime;
         this.HeuristicParam = heuristicParam;
         this.operationsList = generator.getOperations();
     }
@@ -534,10 +555,10 @@ public class AStar<TState>
     /// <summary>
     /// Function will find path (if exist) and return structured PathResult
     /// </summary>
-    /// <param name="startingPuzzleState">Starting Puzzle graphState</param>
-    /// <param name="finishingPuzzleState">Finishing puzzle graphState</param>
+    /// <param name="startingState">Starting Puzzle graphState</param>
+    /// <param name="finishingState">Finishing puzzle graphState</param>
     /// <returns>Returns structured pathResult, if path does not exist, return pathResult, but path will be null</returns>
-    public PathResult getAStarPath(TState startingPuzzleState, TState finishingPuzzleState)
+    public PathResult getAStarPath(TState startingState, TState finishingState)
     {
         HeapList openNodes; //list of open nodes - priority front
         HashList closedNodes; //list of generated nodes
@@ -553,14 +574,14 @@ public class AStar<TState>
         startTime = DateTime.UtcNow; //start time for algorithm
 
         //create Hash table
-        closedNodes = new HashList(this.hashSize);
+        closedNodes = new HashList(this.hashSize, this.hashMaxElementsCount);
 
         //create default heap list
         openNodes = new HeapList(this.heapSize);
 
         //1. add first element
-        tempHeuristicResult = startingPuzzleState.getHeuristicDistance(finishingPuzzleState, this.heuristicParam);
-        openNodes.add(new KeyValuePair(tempHeuristicResult, new GraphState(startingPuzzleState, null, 0, -1, 0, tempHeuristicResult)));
+        tempHeuristicResult = startingState.getHeuristicDistance(finishingState, this.heuristicParam);
+        openNodes.add(new KeyValuePair(tempHeuristicResult, new GraphState(startingState, null, 0, -1, 0, tempHeuristicResult)));
         closedNodes.add(openNodes.getMin().graphState);
         pathResult.generatedNodes++;
         pathResult.maximumUsedHeapMemory++;
@@ -572,7 +593,7 @@ public class AStar<TState>
             if (pathResult.maximumUsedHeapMemory < openNodes.count) pathResult.maximumUsedHeapMemory = openNodes.count;
             if (pathResult.maximumUsedHashMemory < closedNodes.count) pathResult.maximumUsedHashMemory = closedNodes.count;
 
-            //3. select best not-processed graphState
+            //3. select best non-processed graphState
             currentGraphState = openNodes.removeMin().graphState;
             //3.1 now check if node was actualized in hash. If yes, use node from hash.
             tempHashNode = closedNodes.getState(currentGraphState);
@@ -586,11 +607,11 @@ public class AStar<TState>
             //4. test if graphState is finish graphState, or depth is maxDepth or bigger. For -1 maxDepth just ignore depth.
             //also check for elapsed time in miliseconds. For -1 maxtime, just ignore time.
             //If some of these apply, finish searching and return found path.
-            if (currentGraphState.actualState.isEqual(finishingPuzzleState) ||
+            if (currentGraphState.actualState.isEqual(finishingState) ||
                 ((this.maxDepth != -1) && (currentGraphState.graphDepth > this.maxDepth)) ||
                 ((this.maxTime != -1) && ((DateTime.UtcNow).Subtract(startTime).TotalMilliseconds > this.maxTime)))
             {
-                string[] foundOperationsPath = new string[currentGraphState.graphDepth + 1];
+                int[] foundOperationsPath = new int[currentGraphState.graphDepth + 1];
                 TState[] foundStatesPath = new TState[currentGraphState.graphDepth + 1];
                 for (int i = currentGraphState.graphDepth; i > 0; i--)
                 {
@@ -627,7 +648,7 @@ public class AStar<TState>
                 generatedDirectionGraphStates[i] =
                     new GraphState(tempTState, currentGraphState, currentGraphState.graphDepth + 1, i,
                     currentGraphState.distanceFromNeighbour + tempTState.getHeuristicDistance(currentGraphState.actualState, this.heuristicParam),
-                    tempTState.getHeuristicDistance(finishingPuzzleState, this.heuristicParam));
+                    tempTState.getHeuristicDistance(finishingState, this.heuristicParam));
             }
 
             //7. check every child(neighbour) node and add to heap or hash and actualize hash if node score is better
