@@ -18,7 +18,7 @@ namespace SearchingAlgorithms
         /// <param name="state">State to compute distance to.</param>
         /// <param name="param">Optional parameters to give for heuristical function.</param>
         /// <returns>Estimated distance to given graphState as integer. Use 0 if graphState is equal to given graphState.</returns>
-        int getHeuristicDistance(TState state, int param = 0);
+        int getHeuristicDistance(TState state);
     }
 
     /// <summary>
@@ -186,8 +186,9 @@ namespace SearchingAlgorithms
             public HashList(int hashTableSize = DEFAULT_HASHTABLE_SIZE, int maxElementsCount = DEFAULT_MAX_ELEMENTS)
             {
                 this.maxElementsCount = maxElementsCount;
-                this.hashTable = new HashData[this.maxElementsCount];
-                if (this.hashTable == null) throw new System.Exception("hashTable not initialized!\n");
+                this.hashTableSize = hashTableSize;
+                this.hashTable = new HashData[this.hashTableSize];
+                if (this.hashTable == null) throw new System.Exception("HashTable not initialized!\n");
                 this.count = 0;
             }
 
@@ -475,8 +476,8 @@ namespace SearchingAlgorithms
         private int hashMaxElementsCount; //max number of elements in hash
         private int[] operationsList; //list of possible operations to perform with states
 
-        private int maxDepth; //max depth to where to find solutions
-        private int maxTime; //maximum time of searching
+        private int maxSearchingDepth; //max depth to where to find solutions
+        private int maxSearchingTime; //maximum time of searching
         private int heuristicParam; //parameter for heuristic function. Can be changed.
         private DateTime startTime; //used for time tracking
 
@@ -486,8 +487,8 @@ namespace SearchingAlgorithms
         /// </summary>
         public int MaxDepth
         {
-            get { return maxDepth; }
-            set { maxDepth = value; }
+            get { return maxSearchingDepth; }
+            set { maxSearchingDepth = value; }
         }
 
         public int HashSize
@@ -514,8 +515,8 @@ namespace SearchingAlgorithms
         /// </summary>
         public int MaxTime
         {
-            get { return maxTime; }
-            set { maxTime = value; }
+            get { return maxSearchingTime; }
+            set { maxSearchingTime = value; }
         }
 
         /// <summary>
@@ -543,15 +544,13 @@ namespace SearchingAlgorithms
         /// <param name="hashMaxElementsCount"></param>
         /// <param name="maxSearchingDepth">Maximum depth to where to generate child nodes (states). Depth is as follows: Child -> child -> child -> root - 3 -> 2 -> 1 -> 0. Use -1 for infinite.</param>
         /// <param name="maxSearchingTime">Maximum time in miliseconds for search performing. Use -1 for infinite.</param>
-        /// <param name="heuristicParam">Used for heuiristic functions</param>
-        public AStar(TState generator, int heapSize = DEFAULT_HEAP_SIZE, int hashSize = DEFAULT_HASH_SIZE, int hashMaxElementsCount = DEFAULT_HASH_MAX_ELEMENTS, int maxSearchingDepth = -1, int maxSearchingTime = -1, int heuristicParam = 0)
+        public AStar(TState generator, int heapSize = DEFAULT_HEAP_SIZE, int hashSize = DEFAULT_HASH_SIZE, int hashMaxElementsCount = DEFAULT_HASH_MAX_ELEMENTS, int maxSearchingDepth = -1, int maxSearchingTime = -1)
         {
             this.heapSize = heapSize;
             this.hashSize = hashSize;
             this.hashMaxElementsCount = hashMaxElementsCount;
-            this.maxDepth = maxSearchingDepth;
-            this.maxTime = maxSearchingTime;
-            this.HeuristicParam = heuristicParam;
+            this.maxSearchingDepth = maxSearchingDepth;
+            this.maxSearchingTime = maxSearchingTime;
             this.operationsList = generator.getOperations();
         }
 
@@ -583,7 +582,7 @@ namespace SearchingAlgorithms
             openNodes = new HeapList(this.heapSize);
 
             //1. add first element
-            tempHeuristicResult = startingState.getHeuristicDistance(finishingState, this.heuristicParam);
+            tempHeuristicResult = startingState.getHeuristicDistance(finishingState);
             openNodes.add(new KeyValuePair(tempHeuristicResult, new GraphState(startingState, null, 0, -1, 0, tempHeuristicResult)));
             closedNodes.add(openNodes.getMin().graphState);
             pathResult.generatedNodes++;
@@ -611,8 +610,8 @@ namespace SearchingAlgorithms
                 //also check for elapsed time in miliseconds. For -1 maxtime, just ignore time.
                 //If some of these apply, finish searching and return found path.
                 if (currentGraphState.actualState.isEqual(finishingState) ||
-                    ((this.maxDepth != -1) && (currentGraphState.graphDepth > this.maxDepth)) ||
-                    ((this.maxTime != -1) && ((DateTime.UtcNow).Subtract(startTime).TotalMilliseconds > this.maxTime)))
+                    ((this.maxSearchingDepth != -1) && (currentGraphState.graphDepth > this.maxSearchingDepth)) ||
+                    ((this.maxSearchingTime != -1) && ((DateTime.UtcNow).Subtract(startTime).TotalMilliseconds > this.maxSearchingTime)))
                 {
                     int[] foundOperationsPath = new int[currentGraphState.graphDepth + 1];
                     TState[] foundStatesPath = new TState[currentGraphState.graphDepth + 1];
@@ -650,8 +649,8 @@ namespace SearchingAlgorithms
 
                     generatedDirectionGraphStates[i] =
                         new GraphState(tempTState, currentGraphState, currentGraphState.graphDepth + 1, i,
-                        currentGraphState.distanceFromNeighbour + tempTState.getHeuristicDistance(currentGraphState.actualState, this.heuristicParam),
-                        tempTState.getHeuristicDistance(finishingState, this.heuristicParam));
+                        currentGraphState.distanceFromNeighbour + tempTState.getHeuristicDistance(currentGraphState.actualState),
+                        tempTState.getHeuristicDistance(finishingState));
                 }
 
                 //7. check every child(neighbour) node and add to heap or hash and actualize hash if node score is better

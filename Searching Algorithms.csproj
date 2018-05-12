@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{00000000-0000-0000-0000-000000000000}</ProjectGuid>
+    <ProjectGuid>{8D78C246-F813-438A-A533-0231AC570BD3}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>ConsoleApplication</AssemblyName>
@@ -29,6 +29,9 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>SearchingAlgorithms</RootNamespace>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -37,6 +40,56 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AStar.cs" />
+    <Compile Include="Demo.cs" />
+    <Compile Include="HashList.cs" />
+    <Compile Include="ISimpleCollection.cs" />
+    <Compile Include="NPuzzle.cs" />
+    <Compile Include="SingleLinkedList.cs" />
+    <Compile Include="SingleLinkedNode.cs" />
+    <Compile Include="IUnsignedHash.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".git\COMMIT_EDITMSG" />
+    <None Include=".git\config" />
+    <None Include=".git\description" />
+    <None Include=".git\HEAD" />
+    <None Include=".git\hooks\applypatch-msg.sample" />
+    <None Include=".git\hooks\commit-msg.sample" />
+    <None Include=".git\hooks\fsmonitor-watchman.sample" />
+    <None Include=".git\hooks\post-update.sample" />
+    <None Include=".git\hooks\pre-applypatch.sample" />
+    <None Include=".git\hooks\pre-commit.sample" />
+    <None Include=".git\hooks\pre-push.sample" />
+    <None Include=".git\hooks\pre-rebase.sample" />
+    <None Include=".git\hooks\pre-receive.sample" />
+    <None Include=".git\hooks\prepare-commit-msg.sample" />
+    <None Include=".git\hooks\update.sample" />
+    <None Include=".git\index" />
+    <None Include=".git\info\exclude" />
+    <None Include=".git\logs\HEAD" />
+    <None Include=".git\logs\refs\heads\master" />
+    <None Include=".git\objects\19\91aeffa20c0afcc632a29db489a8c805ce8e06" />
+    <None Include=".git\objects\43\4102403fd6513d5e06c58b7c2d86935ffa20ee" />
+    <None Include=".git\objects\4b\825dc642cb6eb9a060e54bf8d69288fbee4904" />
+    <None Include=".git\objects\51\7742ea12bdae9094e61afaef69fa637705650f" />
+    <None Include=".git\objects\7d\84e8cebb60cb7544d767ff8abadc5b22245426" />
+    <None Include=".git\objects\83\81a599a2e4546b7df27962c5e5d1d01292505e" />
+    <None Include=".git\objects\9a\74baf253be94fdb80fb7b42191c01175fdba37" />
+    <None Include=".git\objects\ba\c365375e20a74f251fa3109dd2625f9a7ab8a0" />
+    <None Include=".git\objects\d4\54ecd8bec7f7d5593f4f1d0996de59dcc0b558" />
+    <None Include=".git\objects\fb\8e7685577bb978222537bb5b292e37be21fa10" />
+    <None Include=".git\objects\fc\6c0c0362244224a44a7739e228c2cfa33acb81" />
+    <None Include=".git\refs\heads\master" />
+    <None Include=".git\smartgit.config" />
+    <None Include=".git\smartgit\logcache\nodes" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".git\objects\info\" />
+    <Folder Include=".git\objects\pack\" />
+    <Folder Include=".git\refs\tags\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
