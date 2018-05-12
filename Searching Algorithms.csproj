@@ -45,11 +45,14 @@
     <Compile Include="AStar.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="HashList.cs" />
-    <Compile Include="ISimpleCollection.cs" />
+    <Compile Include="Interfaces\IHashable.cs" />
+    <Compile Include="Interfaces\IGenerative.cs" />
+    <Compile Include="Interfaces\IHeuristical.cs" />
+    <Compile Include="Interfaces\ISimpleCollection.cs" />
     <Compile Include="NPuzzle.cs" />
     <Compile Include="SingleLinkedList.cs" />
     <Compile Include="SingleLinkedNode.cs" />
-    <Compile Include="IUnsignedHash.cs" />
+    <Compile Include="Interfaces\IUnsignedHash.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".git\COMMIT_EDITMSG" />

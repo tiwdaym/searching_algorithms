@@ -16,7 +16,7 @@ namespace SearchingAlgorithms
         /// </summary>
         /// <param name="state">State to compute distance to.</param>
         /// <param name="param">Optional parameters to give for heuristical function.</param>
-        /// <returns>Estimated distance to given graphState as integer. Use 0 if graphState is equal to given graphState.</returns>
+        /// <returns>Estimated distance to given state as integer. Use 0 if state is equal to given state.</returns>
         int HeuristicDistance(TState state);
     }
 }

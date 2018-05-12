@@ -15,9 +15,9 @@ namespace SearchingAlgorithms
         {
             get
             {
-                if (Root == null) return 0;
+                if (root == null) return 0;
                 int count = 1;
-                SingleLinkedNode<TValue> node = Root;
+                SingleLinkedNode<TValue> node = root;
                 while (node.Next != null)
                 {
                     count++;
@@ -27,8 +27,6 @@ namespace SearchingAlgorithms
             }
         }
         
-        public SingleLinkedNode<TValue> Root { get => root; }
-
         public SingleLinkedList(TValue root)
         {
             this.root = new SingleLinkedNode<TValue>(root);
@@ -79,8 +77,8 @@ namespace SearchingAlgorithms
 
         public void Clear()
         {
-            SingleLinkedNode<TValue> nodeToDelete = Root;
-            SingleLinkedNode<TValue> nextToDelete = Root;
+            SingleLinkedNode<TValue> nodeToDelete = root;
+            SingleLinkedNode<TValue> nextToDelete = root;
 
             while (nodeToDelete.Next != null)
             {
@@ -95,9 +93,9 @@ namespace SearchingAlgorithms
 
         public bool Contains(TValue item)
         {
-            if (Root == null) return false;
-            if (Root.Value.Equals(item)) return true;
-            SingleLinkedNode<TValue> node = Root;
+            if (root == null) return false;
+            if (root.Value.Equals(item)) return true;
+            SingleLinkedNode<TValue> node = root;
             while (node.Next != null)
             {
                 if (node.Value.Equals(item)) return true;

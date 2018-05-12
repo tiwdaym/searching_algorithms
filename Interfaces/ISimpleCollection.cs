@@ -13,11 +13,6 @@ namespace SearchingAlgorithms
         int Count { get; }
 
         /// <summary>
-        /// This should return root element of Collection
-        /// </summary>
-        SingleLinkedNode<TValue> Root { get; }
-
-        /// <summary>
         /// Function will add new element to collection
         /// </summary>
         /// <param name="item"></param>
