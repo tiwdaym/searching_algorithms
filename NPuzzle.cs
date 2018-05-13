@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class NPuzzle : Generative<NPuzzle>, Heuristical<NPuzzle>
+    class NPuzzle : IGenerative<NPuzzle>
     {
         public byte[,] byteState;
         public byte spacePosition;
@@ -21,6 +21,12 @@ namespace SearchingAlgorithms
         }
 
         #region Constructors
+        /// <summary>
+        /// Dafult static constructor to make default puzzle filled with 1-N ending with 0
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <param name="columns"></param>
+        /// <returns></returns>
         public static NPuzzle CreateDefault(byte rows = 3, byte columns = 3)
         {
             byte[,] state = new byte[rows, columns];
@@ -53,28 +59,16 @@ namespace SearchingAlgorithms
         }
 
         #endregion
-
-        public NPuzzle generate(int operation)
+        
+        public NPuzzle GenerateNewState(int operation)
         {
+            NPuzzle newState = new NPuzzle(this.byteState);
+            newState
+
             throw new NotImplementedException();
         }
 
-        public uint getHash()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int[] getOperations()
-        {
-            return (int[])Enum.GetNames(typeof(operations)).Select(t => t.GetHashCode());
-        }
-
-        public bool isEqual(NPuzzle state)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int getHeuristicDistance(NPuzzle state)
+        public int[] OperationsList()
         {
             throw new NotImplementedException();
         }
