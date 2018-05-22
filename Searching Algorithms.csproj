@@ -43,15 +43,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AStar.cs" />
+    <Compile Include="Collections\HeapList.cs" />
     <Compile Include="Demo.cs" />
-    <Compile Include="HashList.cs" />
+    <Compile Include="Collections\HashList.cs" />
     <Compile Include="Interfaces\IHashable.cs" />
     <Compile Include="Interfaces\IGenerative.cs" />
     <Compile Include="Interfaces\IHeuristical.cs" />
     <Compile Include="Interfaces\ISimpleCollection.cs" />
     <Compile Include="NPuzzle.cs" />
-    <Compile Include="SingleLinkedList.cs" />
-    <Compile Include="SingleLinkedNode.cs" />
+    <Compile Include="Collections\SingleLinkedList.cs" />
+    <Compile Include="Collections\SingleLinkedNode.cs" />
     <Compile Include="Interfaces\IUnsignedHash.cs" />
   </ItemGroup>
   <ItemGroup>
