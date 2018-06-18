@@ -6,7 +6,7 @@ using SearchingAlgorithms.Collections;
 
 namespace SearchingAlgorithms
 {
-    class AStar<T>
+    class GreedySearch<T>
         where T : IEquatable<T>, IHashable, IGenerative<T>, IHeuristical<T>
     {
         HeapMinList<GraphNodeComplex<T>> openSet;
@@ -93,8 +93,7 @@ namespace SearchingAlgorithms
         }
 
         int heuristicParam;
-        public int HeuristicParam
-        {
+        public int HeuristicParam {
             get => heuristicParam;
             set
             {
@@ -102,9 +101,9 @@ namespace SearchingAlgorithms
                 heuristicParam = value;
             }
         }
+        
 
-
-        public AStar(T startState, T finishState, uint maxSearchingDepth = 0, uint maxSearchingTime = 0, uint maxGeneratedElementsCount = 65536, uint hashSize = 65536, int heuristicParam = 0)
+        public GreedySearch(T startState, T finishState, uint maxSearchingDepth = 0, uint maxSearchingTime = 0, uint maxGeneratedElementsCount = 65536, uint hashSize = 65536, int heuristicParam = 0)
         {
             pathResult = new GeneratedPath<T>();
             MaxSearchingDepth = maxSearchingDepth;
@@ -122,7 +121,7 @@ namespace SearchingAlgorithms
         /// <returns>Result is also stored in pathResult</returns>
         public GeneratedPath<T> findPath()
         {
-            GraphNodeComplex<T> currentGraphNode, tmpGraphNode, tmpGraphNode2;
+            GraphNodeComplex<T> currentGraphNode;
             T tempTState;
 
             //initialization
@@ -148,10 +147,8 @@ namespace SearchingAlgorithms
                 //3. select best non-processed graphState
                 currentGraphNode = openSet.RemoveMin();
                 pathResult.searchedNodes++;
-                //3.1 check if node is in closed set and have better comparing distance
-                if (closedSet.TryGetValue(currentGraphNode, out tmpGraphNode) && tmpGraphNode.comparingParam < currentGraphNode.comparingParam) currentGraphNode = tmpGraphNode;
 
-                //4. test if graphNode is finish, or depth is maxDepth or bigger. For 0 maxDepth just ignore depth.
+                //4. test if graphNodee is finish, or depth is maxDepth or bigger. For 0 maxDepth just ignore depth.
                 //also check for elapsed time in miliseconds. For 0 maxtime, just ignore time.
                 //If some of these apply, finish searching and return found path from current node.
                 if (currentGraphNode.node.Equals(finishState) ||
@@ -193,13 +190,8 @@ namespace SearchingAlgorithms
                     tempTState = currentGraphNode.node.GenerateNewState(operationsList[i]);
                     pathResult.generatedNodes++;
                     if (tempTState == null) continue;
-                    tmpGraphNode = new GraphNodeComplex<T>(tempTState, currentGraphNode, operationsList[i], currentGraphNode.realGraphDepth + 1, currentGraphNode.realGraphDepth + 1 + tempTState.HeuristicDistance(finishState, heuristicParam));
-                    if (closedSet.Contains(tmpGraphNode))
-                    {
-                        if (closedSet.TryGetValue(tmpGraphNode, out tmpGraphNode2) && tmpGraphNode.comparingParam < tmpGraphNode2.comparingParam) closedSet.Remove(tmpGraphNode2);
-                        else continue;
-                    };
-
+                    GraphNodeComplex<T> tmpGraphNode = new GraphNodeComplex<T>(tempTState, currentGraphNode, operationsList[i], currentGraphNode.realGraphDepth + 1, tempTState.HeuristicDistance(finishState, heuristicParam));
+                    if (closedSet.Contains(tmpGraphNode)) continue;
                     openSet.Add(tmpGraphNode);
                     closedSet.Add(tmpGraphNode);
                 }

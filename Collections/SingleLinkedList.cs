@@ -6,67 +6,68 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class SingleLinkedList<TValue> : ISimpleCollection<TValue>
-        where TValue : IEquatable<TValue>
+    class SingleLinkedList<T> : ISimpleCollection<T>
+        where T : IEquatable<T>
     {
-        private SingleLinkedNode<TValue> root;
+        private SingleLinkedNode<T> root;
+        private SingleLinkedNode<T> last;
+        private uint count;
 
-        public int Count
+        public uint Count { get => count; }
+
+        public SingleLinkedList(T rootInitItem = default(T))
         {
-            get
+            if (rootInitItem != null)
             {
-                if (root == null) return 0;
-                int count = 1;
-                SingleLinkedNode<TValue> node = root;
-                while (node.Next != null)
-                {
-                    count++;
-                    node = node.Next;
-                }
-                return count;
+                root = new SingleLinkedNode<T>(rootInitItem);
+                last = root;
+                count = 1;
             }
-        }
-        
-        public SingleLinkedList(TValue root)
-        {
-            this.root = new SingleLinkedNode<TValue>(root);
+            else count = 0;
         }
 
 
-        public void Add(TValue item)
+        public void Add(T item)
         {
-            //Just append new value to an end of list
+            //Create new node if root is null
             if (root == null)
             {
-                root = new SingleLinkedNode<TValue>(item);
+                root = new SingleLinkedNode<T>(item);
                 if (root == null) throw new OutOfMemoryException("Cannot create new Element");
+                count++;
+                last = root;
                 return;
             }
-            SingleLinkedNode<TValue> node = root;
-            while (node.Next != null) node = node.Next;
-            node.Next = new SingleLinkedNode<TValue>(item);
-            if (node.Next == null) throw new OutOfMemoryException("Cannot create new Element");
+
+            last.Next = new SingleLinkedNode<T>(item);
+            if (last.Next == null) throw new OutOfMemoryException("Cannot create new Element");
+            last = last.Next;
+            count++;
         }
 
-        public bool Remove(TValue item)
+        public bool Remove(T item)
         {
             if (root == null) return false;
             if (root.Value.Equals(item))
             {
-                root.Value = default(TValue);
+                root.Value = default(T);
+                if (last == root) last = root.Next;
                 root = root.Next;
+                count--;
                 return true;
             }
 
-            SingleLinkedNode<TValue> node = root.Next;
-            SingleLinkedNode<TValue> prevNode = root;
+            SingleLinkedNode<T> node = root.Next;
+            SingleLinkedNode<T> prevNode = root;
             while (node != null)
             {
                 if (node.Value.Equals(item))
                 {
+                    if (last == node) last = prevNode;
                     prevNode.Next = node.Next;
-                    node.Value = default(TValue);
+                    node.Value = default(T);
                     node.Next = null;
+                    count--;
                     return true;
                 }
                 prevNode = node;
@@ -77,25 +78,26 @@ namespace SearchingAlgorithms
 
         public void Clear()
         {
-            SingleLinkedNode<TValue> nodeToDelete = root;
-            SingleLinkedNode<TValue> nextToDelete = root;
+            SingleLinkedNode<T> nodeToDelete = root;
+            SingleLinkedNode<T> nextToDelete = root;
 
             while (nodeToDelete.Next != null)
             {
                 nextToDelete = nodeToDelete.Next;
-                nodeToDelete.Value = default(TValue);
+                nodeToDelete.Value = default(T);
                 nodeToDelete = nextToDelete;
             }
-            nodeToDelete.Value = default(TValue);
+            nodeToDelete.Value = default(T);
 
+            count = 0;
             root = null;
         }
 
-        public bool Contains(TValue item)
+        public bool Contains(T item)
         {
             if (root == null) return false;
             if (root.Value.Equals(item)) return true;
-            SingleLinkedNode<TValue> node = root;
+            SingleLinkedNode<T> node = root;
             while (node.Next != null)
             {
                 if (node.Value.Equals(item)) return true;
@@ -104,16 +106,41 @@ namespace SearchingAlgorithms
             return false;
         }
 
-        public TValue[] ToList(uint arrayIndex = 0)
+        public bool TryGetValue(T item, out T foundValue)
         {
-            if (arrayIndex < 0) throw new ArgumentOutOfRangeException("Index cannot be less than 0");
-            int count = Count;
-            if ((count - arrayIndex) <= 0) return null;
-            TValue[] list = new TValue[count - arrayIndex];
+            foundValue = default(T);
 
-            SingleLinkedNode<TValue> node = root;
+            if (root == null) return false;
+            if (root.Value.Equals(item))
+            {
+                foundValue = root.Value;
+                return true;
+            }
+            SingleLinkedNode<T> node = root;
+            while (node.Next != null)
+            {
+                if (node.Value.Equals(item))
+                {
+                    foundValue = node.Value;
+                    return true;
+                }
+                node = node.Next;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Function will convert list to array
+        /// </summary>
+        /// <returns></returns>
+        public T[] ToList()
+        {
+            if (count == 0) return null;
+            T[] list = new T[count];
+
+            SingleLinkedNode<T> node = root;
             int i = 0;
-            while(node!=null)
+            while (node != null)
             {
                 list[i++] = node.Value;
                 node = node.Next;

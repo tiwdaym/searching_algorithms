@@ -5,27 +5,27 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class HeapList<TValue>
-        where TValue : IComparable<TValue>
+    class HeapMaxList<T>
+        where T : IComparable<T>
     {
-        public const int DEFAULT_MAX_ELEMENTS = 65536;
-        private const int DATA_OFFSET = 1;
+        public const uint DEFAULT_MAX_ELEMENTS = 65536;
+        private const uint DATA_OFFSET = 1;
 
-        private int maxElementsCount;
-        private int count;
-        private TValue[] heapTable;
+        private uint maxElementsCount;
+        private uint count;
+        private T[] heapTable;
 
-        public int Count { get => count; }
+        public uint Count { get => count; }
 
         /// <summary>
         /// Constructor will create heap array. You can specify number of elements for heap. Default is 65536.
         /// Size cannot change.
         /// </summary>
         /// <param name="maxHeapElements">Number of possible elements in heap.</param>
-        public HeapList(int maxElementsCount = DEFAULT_MAX_ELEMENTS)
+        public HeapMaxList(uint maxElementsCount = DEFAULT_MAX_ELEMENTS)
         {
             this.maxElementsCount = maxElementsCount;
-            this.heapTable = new TValue[maxElementsCount + DATA_OFFSET];
+            this.heapTable = new T[maxElementsCount + DATA_OFFSET];
             if (this.heapTable == null) throw new OutOfMemoryException("Cannot initialize heap table.");
             this.count = 0;
         }
@@ -34,7 +34,7 @@ namespace SearchingAlgorithms.Collections
         /// This will add new item to heap
         /// </summary>
         /// <param name="item"></param>
-        public void Add(TValue item)
+        public void Add(T item)
         {
             if (this.maxElementsCount <= this.count) throw new OutOfMemoryException("Not enough space to add new element to heap. heapSize: " + this.maxElementsCount);
             if (item == null) throw new ArgumentNullException("Item cannot be null.");
@@ -42,11 +42,11 @@ namespace SearchingAlgorithms.Collections
             this.count++;
             this.heapTable[count] = item;
 
-            int iTemp = this.count;
+            uint iTemp = this.count;
 
-            while (iTemp > 1 && (this.heapTable[iTemp].CompareTo(this.heapTable[iTemp / 2]) < 0))
+            while (iTemp > 1 && (this.heapTable[iTemp].CompareTo(this.heapTable[iTemp / 2]) > 0))
             {
-                TValue kTemp = this.heapTable[iTemp / 2];
+                T kTemp = this.heapTable[iTemp / 2];
                 this.heapTable[iTemp / 2] = this.heapTable[iTemp];
                 this.heapTable[iTemp] = kTemp;
                 iTemp /= 2;
@@ -57,7 +57,7 @@ namespace SearchingAlgorithms.Collections
         /// Function will return minimum node from heap, without deleting
         /// </summary>
         /// <returns>Minimum (root) node from heap</returns>
-        public TValue GetMin()
+        public T GetMax()
         {
             return this.heapTable[1];
         }
@@ -66,14 +66,15 @@ namespace SearchingAlgorithms.Collections
         /// Function will return (pop) minimum node from heap, with deleting
         /// </summary>
         /// <returns>Minimum (root) node from heap</returns>
-        public TValue RemoveMin()
+        public T RemoveMax()
         {
             int iTemp;
-            TValue kTemp;
-            TValue result = this.heapTable[1];
+            T kTemp;
+            T result = this.heapTable[1];
 
             this.heapTable[1] = this.heapTable[Count];
-            this.heapTable[this.Count] = default(TValue);
+            this.heapTable[this.Count] = default(T);
+            if (this.count == 0) return default(T);
             this.count--;
             iTemp = 1;
 
@@ -82,7 +83,7 @@ namespace SearchingAlgorithms.Collections
                 //1. check for last elements
                 if (iTemp * 2 == this.count)
                 {
-                    if (this.heapTable[iTemp * 2].CompareTo(this.heapTable[iTemp]) < 0)
+                    if (this.heapTable[iTemp * 2].CompareTo(this.heapTable[iTemp]) > 0)
                     {
                         kTemp = this.heapTable[iTemp * 2];
                         this.heapTable[iTemp * 2] = this.heapTable[iTemp];
@@ -92,7 +93,7 @@ namespace SearchingAlgorithms.Collections
                 }
 
                 //2.check which element is smaller
-                if (this.heapTable[iTemp * 2].CompareTo(this.heapTable[iTemp * 2 + 1]) <= 0)
+                if (this.heapTable[iTemp * 2].CompareTo(this.heapTable[iTemp * 2 + 1]) >= 0)
                 {
                     if (this.heapTable[iTemp].CompareTo(this.heapTable[iTemp * 2]) > 0)
                     {

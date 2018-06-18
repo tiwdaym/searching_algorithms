@@ -6,11 +6,15 @@ using SearchingAlgorithms.Collections;
 
 namespace SearchingAlgorithms
 {
-    class AStar<T>
+    class EvolutionSearch<T>
         where T : IEquatable<T>, IHashable, IGenerative<T>, IHeuristical<T>
     {
-        HeapMinList<GraphNodeComplex<T>> openSet;
-        HashList<GraphNodeComplex<T>> closedSet;
+        DNA[] population;
+        uint populationCount;
+        uint dnaLength;
+        uint generationsCount;
+        HeapMaxList<GraphNodeSimple<DNA>> sorter;
+
         DateTime startTime;
         bool isProcessingChangesDisabled = false;
 
@@ -52,15 +56,7 @@ namespace SearchingAlgorithms
         }
 
 
-        uint maxSearchingDepth = 0;
         uint maxSearchingTime = 0;
-        /// <summary>
-        /// You can set maximum Finding Depth to where algorithm will go.
-        /// After reaching the depth, partial shortest path is returned.
-        /// Usable while computing.
-        /// Use 0 for unlimited depth.
-        /// </summary>
-        public uint MaxSearchingDepth { get => maxSearchingDepth; set => maxSearchingDepth = value; }
         /// <summary>
         /// You can set maximum Finding Time in miliseconds.
         /// After reaching the time, partial shortest path is returned.
@@ -69,28 +65,6 @@ namespace SearchingAlgorithms
         /// </summary>
         public uint MaxSearchingTime { get => maxSearchingTime; set => maxSearchingTime = value; }
 
-
-        uint maxGeneratedElementsCount = 65536;
-        uint hashSize = 65536;
-
-        public uint MaxGeneratedElementsCount
-        {
-            get => maxGeneratedElementsCount;
-            set
-            {
-                if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change maximum generated elements count while in processing.");
-                maxGeneratedElementsCount = value;
-            }
-        }
-        public uint HashSize
-        {
-            get => hashSize;
-            set
-            {
-                if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change Hash size while in processing.");
-                hashSize = value;
-            }
-        }
 
         int heuristicParam;
         public int HeuristicParam
@@ -103,16 +77,45 @@ namespace SearchingAlgorithms
             }
         }
 
+        public uint PopulationCount
+        {
+            get => populationCount;
+            set
+            {
+                if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change Population Count while in processing.");
+                populationCount = value;
+            }
+        }
+        public uint DnaLength
+        {
+            get => dnaLength;
+            set
+            {
+                if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change Dna Length while in processing.");
+                dnaLength = value;
+            }
+        }
+        public uint GenerationsCount
+        {
+            get => generationsCount;
+            set
+            {
+                if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change Generations Count while in processing.");
+                generationsCount = value;
+            }
+        }
 
-        public AStar(T startState, T finishState, uint maxSearchingDepth = 0, uint maxSearchingTime = 0, uint maxGeneratedElementsCount = 65536, uint hashSize = 65536, int heuristicParam = 0)
+        public EvolutionSearch(T startState,T finishState, uint maxSearchingTime = 0, uint maxGeneratedElementsCount = 65536, int heuristicParam = 0,
+            uint populationCount = 1000, uint dnaLength = 500, uint generationsCount = 1000, uint crossoverPointsCount = 1, uint smallestCrossoverChromosomeUnit = 1, uint breedingStrategy = 0,
+            double amountOfGenerationToSurvive = 0.50, double amountOfNewRandomIndividuals = 0.1, double mutationChance = 0.02)
         {
             pathResult = new GeneratedPath<T>();
-            MaxSearchingDepth = maxSearchingDepth;
             MaxSearchingTime = maxSearchingTime;
-            MaxGeneratedElementsCount = maxGeneratedElementsCount;
-            HashSize = hashSize;
             StartState = startState;
             FinishState = finishState;
+            PopulationCount = populationCount;
+            GenerationsCount = generationsCount;
+            DnaLength = dnaLength;
             HeuristicParam = heuristicParam;
         }
 
@@ -122,16 +125,28 @@ namespace SearchingAlgorithms
         /// <returns>Result is also stored in pathResult</returns>
         public GeneratedPath<T> findPath()
         {
-            GraphNodeComplex<T> currentGraphNode, tmpGraphNode, tmpGraphNode2;
-            T tempTState;
-
             //initialization
             isProcessingChangesDisabled = true;
-            openSet = new HeapMinList<GraphNodeComplex<T>>(maxGeneratedElementsCount);
-            closedSet = new HashList<GraphNodeComplex<T>>(hashSize, maxGeneratedElementsCount);
+            startTime = DateTime.UtcNow;
 
             pathResult = new GeneratedPath<T>();
-            startTime = DateTime.UtcNow;
+
+            //01. Initialize Random population and compute fitness (sorted from min to max in array)
+            InitializeRandomPopulation();
+            PopulationFitness();
+
+            uint currentGeneration = 0;
+
+            while (currentGeneration < generationsCount)
+            {
+
+
+
+
+                PopulationFitness();
+            }
+
+
 
 
             //1. add first element
@@ -212,15 +227,76 @@ namespace SearchingAlgorithms
         }
 
 
+        void InitializeRandomPopulation()
+        {
+            this.population = new DNA[this.populationCount];
+            int operationsCount = this.startState.OperationsList().Length;
+            for (uint i = 0; i < this.populationCount; i++) this.population[i] = DNA.Random(this.dnaLength, operationsCount);
+        }
+
+
+
+        void PopulationFitness()
+        {
+            T tempTState = startState;
+
+            sorter = new HeapMaxList<GraphNodeSimple<DNA>>(populationCount);
+
+            DNA currentDna;
+
+            for (int i = 0; i < populationCount; i++)
+            {
+                currentDna = population[i];
+                sorter.Add(new GraphNodeSimple<DNA>(currentDna, null, null, DnaFitness(currentDna)));
+            }
+
+            for (int i = 0; i < populationCount; i++)
+            {
+                population[i] = sorter.GetMax().node;
+                pathResult.searchedNodes += (ulong)sorter.RemoveMax().graphDepth;
+            }
+        }
+
+        int DnaFitness(DNA dna)
+        {
+            int dnaLength = dna.chromosome.Length;
+            string[] operationsList = startState.OperationsList();
+            int operationsCount = operationsList.Length;
+            uint nextOperation = 0;
+            int distance = 0;
+
+            T currentState = startState;
+            T tmpState;
+
+            while (distance < dnaLength)
+            {
+                if (currentState.Equals(finishState)) break;
+                nextOperation = dna.chromosome[distance];
+                if (nextOperation < operationsCount)
+                {
+                    tmpState = currentState.GenerateNewState(operationsList[nextOperation]);
+                    if (tmpState != null) currentState = tmpState;
+                }
+                distance++;
+            }
+            
+            return dnaLength - distance + startState.HeuristicDistance(finishState, heuristicParam) - currentState.HeuristicDistance(finishState, heuristicParam);
+        }
+
+        DNA[] BreedChildrens(DNA parent1, DNA parent2)
+        {
+            DNA[] childrens = new DNA[2];
+
+        }
+
 
         /// <summary>
         /// This should be called to clean hash and heap lists and reset processing stage
         /// </summary>
         public void ResetProcessing()
         {
-            closedSet = null;
-            openSet = null;
-
+            sorter = null;
+            population = null;
             isProcessingChangesDisabled = false;
         }
     }

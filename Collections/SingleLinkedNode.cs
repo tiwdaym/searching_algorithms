@@ -5,18 +5,18 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class SingleLinkedNode<TValue>
+    class SingleLinkedNode<T>
     {
-        private TValue value;
-        private SingleLinkedNode<TValue> next;
+        private T value;
+        private SingleLinkedNode<T> next;
 
-        public SingleLinkedNode(TValue value)
+        public SingleLinkedNode(T value)
         {
             this.Value = value;
             this.Next = null;
         }
 
-        public TValue Value { get => value; set => this.value = value; }
-        internal SingleLinkedNode<TValue> Next { get => next; set => next = value; }
+        public T Value { get => value; set => this.value = value; }
+        internal SingleLinkedNode<T> Next { get => next; set => next = value; }
     }
 }

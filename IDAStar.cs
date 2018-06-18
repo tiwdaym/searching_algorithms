@@ -6,13 +6,15 @@ using SearchingAlgorithms.Collections;
 
 namespace SearchingAlgorithms
 {
-    class AStar<T>
+    class IDAStar<T>
         where T : IEquatable<T>, IHashable, IGenerative<T>, IHeuristical<T>
     {
-        HeapMinList<GraphNodeComplex<T>> openSet;
+        StackList<GraphNodeComplex<T>> openSet;
         HashList<GraphNodeComplex<T>> closedSet;
         DateTime startTime;
         bool isProcessingChangesDisabled = false;
+        bool useHash = true;
+        public bool UseHash { get => useHash; set => useHash = value; }
 
 
         GeneratedPath<T> pathResult = null;
@@ -70,16 +72,16 @@ namespace SearchingAlgorithms
         public uint MaxSearchingTime { get => maxSearchingTime; set => maxSearchingTime = value; }
 
 
-        uint maxGeneratedElementsCount = 65536;
+        uint maxStackSize = 65536;
         uint hashSize = 65536;
 
-        public uint MaxGeneratedElementsCount
+        public uint MaxStackSize
         {
-            get => maxGeneratedElementsCount;
+            get => maxStackSize;
             set
             {
                 if (isProcessingChangesDisabled) throw new InvalidOperationException("Cannot change maximum generated elements count while in processing.");
-                maxGeneratedElementsCount = value;
+                maxStackSize = value;
             }
         }
         public uint HashSize
@@ -104,12 +106,13 @@ namespace SearchingAlgorithms
         }
 
 
-        public AStar(T startState, T finishState, uint maxSearchingDepth = 0, uint maxSearchingTime = 0, uint maxGeneratedElementsCount = 65536, uint hashSize = 65536, int heuristicParam = 0)
+
+        public IDAStar(T startState, T finishState, uint maxSearchingDepth = 0, uint maxSearchingTime = 0, uint maxStackSize = 65536, uint hashSize = 65536, int heuristicParam = 0)
         {
             pathResult = new GeneratedPath<T>();
             MaxSearchingDepth = maxSearchingDepth;
             MaxSearchingTime = maxSearchingTime;
-            MaxGeneratedElementsCount = maxGeneratedElementsCount;
+            MaxStackSize = maxStackSize;
             HashSize = hashSize;
             StartState = startState;
             FinishState = finishState;
@@ -124,32 +127,44 @@ namespace SearchingAlgorithms
         {
             GraphNodeComplex<T> currentGraphNode, tmpGraphNode, tmpGraphNode2;
             T tempTState;
+            bool nextIteration = false;
+            uint currentIterativeMaxDepth = 0;
+            uint newLowestIterativeMaxDepth = uint.MaxValue;
 
             //initialization
             isProcessingChangesDisabled = true;
-            openSet = new HeapMinList<GraphNodeComplex<T>>(maxGeneratedElementsCount);
-            closedSet = new HashList<GraphNodeComplex<T>>(hashSize, maxGeneratedElementsCount);
+            openSet = new StackList<GraphNodeComplex<T>>(maxStackSize);
+            if (useHash) closedSet = new HashList<GraphNodeComplex<T>>(hashSize, maxStackSize);
 
             pathResult = new GeneratedPath<T>();
             startTime = DateTime.UtcNow;
 
 
             //1. add first element
-            openSet.Add(new GraphNodeComplex<T>(startState, null, null, 0, startState.HeuristicDistance(finishState, heuristicParam)));
+            openSet.Push(new GraphNodeComplex<T>(startState, null, null, 0, startState.HeuristicDistance(finishState, heuristicParam)));
+            currentIterativeMaxDepth = (uint)startState.HeuristicDistance(finishState, heuristicParam);
             pathResult.generatedNodes++;
 
             //2. check if graph is not empty
-            while (openSet.Count > 0)
+            while (openSet.Count > 0 || nextIteration)
             {
-                //2.1 special - add maximum used heap and hash size
-                if (pathResult.maximumUsedHeapMemory < openSet.Count) pathResult.maximumUsedHeapMemory = openSet.Count;
-                if (pathResult.maximumUsedHashMemory < closedSet.Count) pathResult.maximumUsedHashMemory = closedSet.Count;
+                if (nextIteration)
+                {
+                    nextIteration = false;
+                    newLowestIterativeMaxDepth = uint.MaxValue;
+                    openSet = new StackList<GraphNodeComplex<T>>(maxStackSize);
+                    if (useHash) closedSet = new HashList<GraphNodeComplex<T>>(hashSize, maxStackSize);
+                    //2.0 add first element again and start from start
+                    openSet.Push(new GraphNodeComplex<T>(startState, null, null, 0, startState.HeuristicDistance(finishState, heuristicParam)));
+                    pathResult.generatedNodes++;
+                }
+                //2.1 special - add maximum used stack and hash size
+                if (pathResult.maximumUsedStackMemory < openSet.Count) pathResult.maximumUsedHeapMemory = openSet.Count;
+                if (useHash) if (pathResult.maximumUsedHashMemory < closedSet.Count) pathResult.maximumUsedHashMemory = closedSet.Count;
 
                 //3. select best non-processed graphState
-                currentGraphNode = openSet.RemoveMin();
+                currentGraphNode = openSet.Pop();
                 pathResult.searchedNodes++;
-                //3.1 check if node is in closed set and have better comparing distance
-                if (closedSet.TryGetValue(currentGraphNode, out tmpGraphNode) && tmpGraphNode.comparingParam < currentGraphNode.comparingParam) currentGraphNode = tmpGraphNode;
 
                 //4. test if graphNode is finish, or depth is maxDepth or bigger. For 0 maxDepth just ignore depth.
                 //also check for elapsed time in miliseconds. For 0 maxtime, just ignore time.
@@ -183,27 +198,44 @@ namespace SearchingAlgorithms
                 }
 
                 //5. add current node to hash
-                closedSet.Add(currentGraphNode);
+                if (useHash) closedSet.Add(currentGraphNode);
 
                 string[] operationsList = currentGraphNode.node.OperationsList();
-
-                //6. create childs (neighbours) of current node and add them to open and closed set for checking
+                HeapMaxList<GraphNodeComplex<T>> sortedGraphNodes = new HeapMaxList<GraphNodeComplex<T>>((uint)operationsList.Length);
+                //6. create childs (neighbours) of current node and add them to stack for checking, if their depth is less than max iterative depth. Otherwise use their depth as new minimal depth
                 for (int i = (operationsList.Length - 1); i >= 0; i--)
                 {
                     tempTState = currentGraphNode.node.GenerateNewState(operationsList[i]);
                     pathResult.generatedNodes++;
                     if (tempTState == null) continue;
                     tmpGraphNode = new GraphNodeComplex<T>(tempTState, currentGraphNode, operationsList[i], currentGraphNode.realGraphDepth + 1, currentGraphNode.realGraphDepth + 1 + tempTState.HeuristicDistance(finishState, heuristicParam));
-                    if (closedSet.Contains(tmpGraphNode))
+                    //Cut nodes with higher depth than maximum depth
+                    if (tmpGraphNode.comparingParam > currentIterativeMaxDepth)
                     {
-                        if (closedSet.TryGetValue(tmpGraphNode, out tmpGraphNode2) && tmpGraphNode.comparingParam < tmpGraphNode2.comparingParam) closedSet.Remove(tmpGraphNode2);
-                        else continue;
-                    };
+                        if (tmpGraphNode.comparingParam < newLowestIterativeMaxDepth) newLowestIterativeMaxDepth = (uint)tmpGraphNode.comparingParam;
+                        continue;
+                    }
+                    if (useHash && closedSet.TryGetValue(tmpGraphNode, out tmpGraphNode2))
+                    {
+                        if (tmpGraphNode.comparingParam < tmpGraphNode2.comparingParam)
+                        {
+                            closedSet.Remove(tmpGraphNode2);
+                            sortedGraphNodes.Add(tmpGraphNode);
+                        }
+                        continue;
+                    }
 
-                    openSet.Add(tmpGraphNode);
-                    closedSet.Add(tmpGraphNode);
+                    sortedGraphNodes.Add(tmpGraphNode);
                 }
+                while (sortedGraphNodes.Count > 0) openSet.Push(sortedGraphNodes.RemoveMax());
 
+
+                //7. check if new depth should be created
+                if (openSet.Count == 0)
+                {
+                    currentIterativeMaxDepth = newLowestIterativeMaxDepth;
+                    nextIteration = true;
+                }
             }
 
             ResetProcessing();
@@ -220,7 +252,7 @@ namespace SearchingAlgorithms
         {
             closedSet = null;
             openSet = null;
-
+            //iterativeMaxDepth = 0;
             isProcessingChangesDisabled = false;
         }
     }

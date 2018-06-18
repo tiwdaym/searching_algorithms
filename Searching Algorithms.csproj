@@ -42,10 +42,23 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AStar.cs" />
-    <Compile Include="Collections\HeapList.cs" />
+    <Compile Include="Collections\DNA.cs" />
+    <Compile Include="EvolutionSearch.cs" />
+    <Compile Include="AStarOld.cs" />
+    <Compile Include="BFS.cs" />
+    <Compile Include="Collections\GeneratedPath.cs" />
+    <Compile Include="Collections\GraphNodeComplex.cs" />
+    <Compile Include="Collections\GraphNodeSimple.cs" />
+    <Compile Include="Collections\HeapMaxList.cs" />
+    <Compile Include="Collections\HeapMinList.cs" />
+    <Compile Include="Collections\StackList.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="Collections\HashList.cs" />
+    <Compile Include="AStar.cs" />
+    <Compile Include="Evolution.cs" />
+    <Compile Include="IDAStar.cs" />
+    <Compile Include="DFS.cs" />
+    <Compile Include="GreedySearch.cs" />
     <Compile Include="Interfaces\IHashable.cs" />
     <Compile Include="Interfaces\IGenerative.cs" />
     <Compile Include="Interfaces\IHeuristical.cs" />
@@ -53,7 +66,6 @@
     <Compile Include="NPuzzle.cs" />
     <Compile Include="Collections\SingleLinkedList.cs" />
     <Compile Include="Collections\SingleLinkedNode.cs" />
-    <Compile Include="Interfaces\IUnsignedHash.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".git\COMMIT_EDITMSG" />
