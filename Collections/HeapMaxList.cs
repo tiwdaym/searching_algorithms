@@ -6,7 +6,7 @@ using System.Text;
 namespace SearchingAlgorithms.Collections
 {
     class HeapMaxList<T>
-        where T : IComparable<T>
+        where T : IComparable<T>, IEquatable<T>
     {
         public const uint DEFAULT_MAX_ELEMENTS = 65536;
         private const uint DATA_OFFSET = 1;
@@ -120,6 +120,12 @@ namespace SearchingAlgorithms.Collections
             }
 
             return result;
+        }
+
+        public bool Contains(T item)
+        {
+            for (int i = 0; i < count; i++) if (heapTable[i].Equals(item)) return true;
+            return false;
         }
     }
 }

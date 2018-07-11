@@ -132,7 +132,22 @@ namespace SearchingAlgorithms
 
         public T[] ToList()
         {
-            throw new NotImplementedException();
+            if (count == 0) return null;
+            T[] returnList = new T[count];
+            T[] linkedListFromHash;
+
+            int iList = 0;
+            int iHash = -1;
+            while (iList < count)
+            {
+                if (hashTable[++iHash] == null ||
+                    (linkedListFromHash = hashTable[iHash].ToList()) == null ||
+                    linkedListFromHash.Length == 0) continue;
+
+                Array.Copy(linkedListFromHash, 0, returnList, iList, linkedListFromHash.Length);
+                iList += linkedListFromHash.Length;
+            }
+            return returnList;
         }
     }
 }

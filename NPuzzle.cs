@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class NPuzzle : IGenerative<NPuzzle>, IHeuristical<NPuzzle>, IEquatable<NPuzzle>, IHashable
+    public class NPuzzle : IGenerative<NPuzzle>, IHeuristical<NPuzzle>, IEquatable<NPuzzle>, IHashable, IEvaluable<NPuzzle.Operation>
     {
         private byte[,] byteState;
         private byte spacePosition;
@@ -18,6 +18,10 @@ namespace SearchingAlgorithms
         public byte Columns { get => columns; }
 
         static Random rnd = new Random();
+        static NPuzzle fitnessStartState = null;
+        public static NPuzzle FitnessStartState { get => fitnessStartState; set => fitnessStartState = value; }
+        static NPuzzle fitnessFinishState = null;
+        public static NPuzzle FitnessFinishState { get => fitnessFinishState; set => fitnessFinishState = value; }
 
         public enum operations
         {
@@ -26,6 +30,36 @@ namespace SearchingAlgorithms
             up,
             down
         }
+
+        /// <summary>
+        /// STruct defined for use in Evolution algorithm
+        /// </summary>
+        public struct Operation : IRandomizable<Operation>, IEquatable<Operation>, IHashable
+        {
+            public operations bit;
+            static Random rnd = new Random();
+
+            public Operation(operations bit)
+            {
+                this.bit = bit;
+            }
+
+            public bool Equals(Operation other)
+            {
+                return bit == other.bit;
+            }
+
+            public uint GetHash()
+            {
+                return (uint)bit;
+            }
+
+            public Operation NextRandom()
+            {
+                return new Operation((operations)rnd.Next(Enum.GetValues(typeof(operations)).Length));
+            }
+        }
+
 
         public enum heuristics
         {
@@ -177,7 +211,7 @@ namespace SearchingAlgorithms
 
         public int HeuristicDistance(NPuzzle state, int param)
         {
-            switch(param)
+            switch (param)
             {
                 case (int)heuristics.empty: return 0;
                 case (int)heuristics.position: return HeuristicPosition(this, state);
@@ -186,7 +220,7 @@ namespace SearchingAlgorithms
                 default: return 0;
             }
         }
-        
+
         /// <summary>
         /// Heuristic Computation for displacement position will count, how many pieces are not on correct position.
         /// </summary>
@@ -336,7 +370,7 @@ namespace SearchingAlgorithms
             for (int x = 0; x < rows; x++)
                 for (int y = 0; y < columns; y++)
                     if (byteState[x, y] != npuzzle.byteState[x, y]) return false;
-            
+
             return true;
         }
 
@@ -351,8 +385,32 @@ namespace SearchingAlgorithms
             uint seed = 101;
             for (int x = 0; x < rows; x++)
                 for (int y = 0; y < columns; y++)
-                    hash = hash * seed + byteState[x,y];
+                    hash = hash * seed + byteState[x, y];
             return hash;
+        }
+
+        /// <summary>
+        /// Function will return fitness for evolution search
+        /// </summary>
+        /// <param name="IO_DATA"></param>
+        /// <returns></returns>
+        public uint Fitness(Operation[] chromosome)
+        {
+            if (fitnessFinishState == null || fitnessStartState == null) throw new ArgumentNullException("To use fitness function, you must first initialize static Fitness States");
+
+            NPuzzle tmpState;
+            NPuzzle evaluatedState = fitnessStartState.GetCopy();
+            
+            uint i = 0;
+            while (i < chromosome.Length)
+            {
+                tmpState = evaluatedState.GenerateNewState(Enum.GetName(typeof(operations), chromosome[i].bit));
+                if (tmpState != null) evaluatedState = tmpState;
+                if (evaluatedState.Equals(fitnessFinishState)) break;
+                i++;
+            }
+
+            return (uint)(2 * chromosome.Length - i - HeuristicManhattanCollistionsDistance(evaluatedState, fitnessFinishState));
         }
     }
 }

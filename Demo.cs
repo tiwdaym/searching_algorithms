@@ -16,6 +16,7 @@ public class Demo
     AStar<NPuzzle> astar;
     DFS<NPuzzle> dfs;
     IDAStar<NPuzzle> idastar;
+    Evolution<NPuzzle, NPuzzle.Operation> evolution;
 
     static void Main(string[] args)
     {
@@ -25,13 +26,26 @@ public class Demo
 
     public Demo()
     {
-        defaultPuzzle = new NPuzzle(3,3);
-        myPuzzle = defaultPuzzle.GenerateRandomState(5);
+        defaultPuzzle = new NPuzzle(4, 4);
+        myPuzzle = defaultPuzzle.GenerateRandomState(30);
         bfs = new BFS<NPuzzle>(myPuzzle, defaultPuzzle);
+        bfs.MaxSearchingTime = 40;
         greedy = new GreedySearch<NPuzzle>(myPuzzle, defaultPuzzle);
+        greedy.MaxSearchingTime = 40;
         astar = new AStar<NPuzzle>(myPuzzle, defaultPuzzle);
+        //astar.HashSize = 2097152;
+        //astar.MaxGeneratedElementsCount = 2097152;
+        astar.MaxSearchingTime = 40;
         dfs = new DFS<NPuzzle>(myPuzzle, defaultPuzzle);
+        dfs.MaxSearchingTime = 40;
         idastar = new IDAStar<NPuzzle>(myPuzzle, defaultPuzzle);
+        //idastar.HashSize = 2097152;
+        //idastar.MaxStackSize = 2097152;
+        idastar.MaxSearchingTime = 40;
+
+        evolution = new Evolution<NPuzzle, NPuzzle.Operation>(defaultPuzzle, new NPuzzle.Operation());
+        NPuzzle.FitnessStartState = myPuzzle;
+        NPuzzle.FitnessFinishState = defaultPuzzle; //For Evolution
     }
 
     public void Run()
@@ -177,12 +191,56 @@ public class Demo
             idastar.ResetProcessing();
         }
         Console.WriteLine("--------------");
+
+        //Evolution search
+        try
+        {
+            Console.WriteLine("Evolution Search:");
+            evolution.ResetProcessing();
+            evolution.MaxGenerationsCount = 100;
+            evolution.MutationChance = 0.05;
+            evolution.InitializeRandomPopulation();
+            evolution.EvaluateCurrentPopulationFitness();
+            
+            for (int i = 0; i < 10000; i++)
+            {
+                printEvolutionDataSearch(startState, evolution);
+                evolution.EvaluateCurrentPopulationFitness();
+                evolution.GenerateNewGeneration();
+            }
+            //evolution.RunEvolutionProcess();
+        }
+        catch (OutOfMemoryException e)
+        {
+            Console.WriteLine("Evolution Search is Out of memory: " + e.Message);
+            evolution.ResetProcessing();
+        }
+        Console.WriteLine("--------------");
+    }
+
+    void printEvolutionDataSearch(NPuzzle startState, Evolution<NPuzzle, NPuzzle.Operation> evolution)
+    {
+        DNA<NPuzzle.Operation> individual = evolution.Population[0];
+        Console.WriteLine("Best Individual Fitness: " + evolution.Evaluate(individual) + " | Average Fitness: " + evolution.TotalPopulationFitness / evolution.PopulationSize + " | Generation: " + evolution.CurrentGeneration);
+        NPuzzle tmpState = startState.GetCopy();
+        string currentOperation = "";
+        int i = 0;
+        while (i < individual.chromosome.Length)
+        {
+            if (i <= 8) Console.Write(i + ": " + currentOperation + " ");
+            if (tmpState.Equals(NPuzzle.FitnessFinishState)) break;
+            currentOperation = Enum.GetName(typeof(NPuzzle.operations), individual.chromosome[i].bit);
+            tmpState = tmpState.GenerateNewState(currentOperation) ?? tmpState;
+            i++;
+        }
+        Console.WriteLine("Path Length: " + i);
+        Console.WriteLine();
     }
 
     void printNicePathStatistics(GeneratedPath<NPuzzle> path)
     {
         Console.WriteLine("Path Length: " + (path.pathLength - 1) + " | Searched Nodes: " + path.searchedNodes + " | Hash used: " + path.maximumUsedHashMemory + " | Heap used: " + path.maximumUsedHeapMemory + " | Generated Nodes: " + path.generatedNodes);
-        for (int i = 0; i < path.pathLength && i<=8; i++) Console.Write(i + ": " + path.pathOperations[i] + " ");
+        for (int i = 0; i < path.pathLength && i <= 8; i++) Console.Write(i + ": " + path.pathOperations[i] + " ");
         Console.WriteLine();
     }
 

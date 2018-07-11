@@ -123,7 +123,7 @@ namespace SearchingAlgorithms
         /// Function call will find Path by default set parameters
         /// </summary>
         /// <returns>Result is also stored in pathResult</returns>
-        public GeneratedPath<T> findPath()
+        /*public GeneratedPath<T> findPath()
         {
             //initialization
             isProcessingChangesDisabled = true;
@@ -224,14 +224,14 @@ namespace SearchingAlgorithms
             ResetProcessing();
 
             return null;
-        }
+        }*/
 
 
         void InitializeRandomPopulation()
         {
             this.population = new DNA[this.populationCount];
             int operationsCount = this.startState.OperationsList().Length;
-            for (uint i = 0; i < this.populationCount; i++) this.population[i] = DNA.Random(this.dnaLength, operationsCount);
+            for (uint i = 0; i < this.populationCount; i++) this.population[i] = DNA.Random(this.dnaLength, operationsCount, 0);
         }
 
 
@@ -283,11 +283,11 @@ namespace SearchingAlgorithms
             return dnaLength - distance + startState.HeuristicDistance(finishState, heuristicParam) - currentState.HeuristicDistance(finishState, heuristicParam);
         }
 
-        DNA[] BreedChildrens(DNA parent1, DNA parent2)
+        /*DNA[] BreedChildrens(DNA parent1, DNA parent2)
         {
             DNA[] childrens = new DNA[2];
 
-        }
+        }*/
 
 
         /// <summary>

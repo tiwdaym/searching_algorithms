@@ -145,7 +145,7 @@ namespace SearchingAlgorithms
                 //3. Get first min node from graph and save it to list of generatedNodes if depth applies
                 currentGraphNode = openSet.RemoveMin();
                 if ((statesDepth == 0 || statesDepth == currentGraphNode.graphDepth) && generatedNodes.Count < maxGeneratedElementsCount) generatedNodes.Add(currentGraphNode);
-                
+
                 //4. add current node to hash
                 closedSet.Add(currentGraphNode);
 
@@ -170,7 +170,7 @@ namespace SearchingAlgorithms
                     break;
                 }
             }
-            
+
             ResetProcessing();
 
             //7. Return generated ndoes as list.
@@ -342,6 +342,11 @@ namespace SearchingAlgorithms
 
                     if (graphNodeFromStart == null) closedSet.TryGetValue(graphNodeFromFinish, out graphNodeFromStart);
                     if (graphNodeFromFinish == null) closedSetReversed.TryGetValue(graphNodeFromStart, out graphNodeFromFinish);
+                    //if any graphNodeFrom is still null, create non-null null graph node
+                    if (!(isProcessingReversedSet ? closedSet : closedSetReversed).Contains(currentGraphNode)) {
+                        graphNodeFromFinish = new GraphNodeSimple<T>(finishState, null, null, 0);
+                        if (graphNodeFromStart == null) graphNodeFromStart = openSet.GetMin();
+                    }
 
                     //4.0 init operation paths arrays
                     string[] foundOperationsPath = new string[graphNodeFromStart.graphDepth + graphNodeFromFinish.graphDepth + 1];
@@ -375,7 +380,7 @@ namespace SearchingAlgorithms
                             tmpState = lastState.GenerateNewState(foundOperation);
                             if (tmpState != null && tmpState.Equals(graphNodeFromFinish.graphParent.node)) break;
                         }
-                        if (tmpState == null) throw new InvalidOperationException("There isn't possible operation that can create state from starting state by backward moving.");
+                        if (tmpState == null) throw new InvalidOperationException("There is no possible operation that can create state from starting state by backward moving.");
                         foundStatesPath[i_nodes] = graphNodeFromFinish.graphParent.node;
                         foundOperationsPath[i_nodes] = foundOperation;
                         lastState = tmpState;

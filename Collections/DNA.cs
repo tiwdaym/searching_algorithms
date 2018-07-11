@@ -5,24 +5,28 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class DNA : IEquatable<DNA>, IHashable
+    class DNA<T> : IEquatable<DNA<T>>, IHashable, IComparable<DNA<T>>
+        where T: IEquatable<T>, IHashable, IRandomizable<T>
     {
-        public uint[] chromosome;
+        public T[] chromosome;
 
-        static Random rnd = null;
+        private uint fitness;
+        public uint Fitness { get => fitness; set => fitness = value; }
 
-        public DNA(uint[] chromosome)
+        static Random rnd = new Random();
+
+        public DNA(T[] chromosome, int fitness = 0)
         {
             if (chromosome == null) throw new ArgumentNullException("Chromosome cannot be null.");
             this.chromosome = chromosome;
-            if (rnd == null) rnd = new Random();
+            this.fitness = 0;
         }
 
-        public bool Equals(DNA other)
+        public bool Equals(DNA<T> other)
         {
             int chromosomeLength = chromosome.Length;
             if (chromosomeLength != other.chromosome.Length) return false;
-            for (int i = 0; i < chromosomeLength; i++) if (chromosome[i] != other.chromosome[i]) return false;
+            for (int i = 0; i < chromosomeLength; i++) if (!chromosome[i].Equals(other.chromosome[i])) return false;
             return true;
         }
 
@@ -30,22 +34,23 @@ namespace SearchingAlgorithms.Collections
         {
             uint hash = 0;
             uint seed = 101;
-            for (int i = chromosome.Length - 1; i >= 0; i--) hash = hash * seed + chromosome[i];
+            for (int i = chromosome.Length - 1; i >= 0; i--) hash = hash * seed + chromosome[i].GetHash();
             return hash;
         }
 
-        public static DNA Random(uint length, int operationsCount)
+        public static DNA<T> Random(T randomizer, uint chromosomeLength)
         {
-            uint[] chromosome = new uint[length];
+            T[] chromosome = new T[chromosomeLength];
 
-            for (uint i = 0; i < length; i++)
-            {
-                chromosome[i] = (uint)rnd.Next(0, operationsCount);
-            }
-
-            return new DNA(chromosome);
+            for (uint i = 0; i < chromosomeLength; i++) chromosome[i] = randomizer.NextRandom();
+            
+            return new DNA<T>(chromosome);
         }
 
+        public int CompareTo(DNA<T> other)
+        {
+            return (int)this.fitness - (int)other.fitness;
+        }
     }
 }
 
