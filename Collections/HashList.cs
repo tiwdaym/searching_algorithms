@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class HashList<T> : ISimpleCollection<T>
+    public class HashList<T> : ISimpleCollection<T>
         where T : IEquatable<T>, IHashable
     {
         public const uint DEFAULT_HASHTABLE_SIZE = 65536;

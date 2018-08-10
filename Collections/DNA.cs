@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class DNA<T> : IEquatable<DNA<T>>, IHashable, IComparable<DNA<T>>
+    public class DNA<T> : IEquatable<DNA<T>>, IHashable, IComparable<DNA<T>>
         where T: IEquatable<T>, IHashable, IRandomizable<T>
     {
         public T[] chromosome;

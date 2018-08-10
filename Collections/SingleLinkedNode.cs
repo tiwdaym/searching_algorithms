@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class SingleLinkedNode<T>
+    public class SingleLinkedNode<T>
     {
         private T value;
         private SingleLinkedNode<T> next;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.SQLite;
+using SearchingAlgorithms.Collections;
 
 namespace SearchingAlgorithms
 {
@@ -66,7 +68,8 @@ namespace SearchingAlgorithms
             empty,
             position,
             distance,
-            distanceWithCollisions
+            distanceWithCollisions,
+            lookup
         }
 
         #region constructors
@@ -217,6 +220,7 @@ namespace SearchingAlgorithms
                 case (int)heuristics.position: return HeuristicPosition(this, state);
                 case (int)heuristics.distance: return HeuristicManhattanDistance(this, state);
                 case (int)heuristics.distanceWithCollisions: return HeuristicManhattanCollistionsDistance(this, state);
+                case (int)heuristics.lookup: return HeuristicLookUpTable(this, state);
                 default: return 0;
             }
         }
@@ -400,7 +404,7 @@ namespace SearchingAlgorithms
 
             NPuzzle tmpState;
             NPuzzle evaluatedState = fitnessStartState.GetCopy();
-            
+
             uint i = 0;
             while (i < chromosome.Length)
             {
@@ -412,5 +416,131 @@ namespace SearchingAlgorithms
 
             return (uint)(2 * chromosome.Length - i - HeuristicManhattanCollistionsDistance(evaluatedState, fitnessFinishState));
         }
+
+
+        /// <summary>
+        /// Function will create SQLLite database
+        /// </summary>
+        /// <param name="dbName"></param>
+        public static void InitDatabaseForWholeHeuristic(int rows, int columns)
+        {
+            string dbname = "Lookup" + rows + "-" + columns + ".sqlite";
+            SQLiteConnection.CreateFile(dbname);
+            SQLiteConnection dbConn = new SQLiteConnection("Data Source=" + dbname + ";Version=3");
+            dbConn.Open();
+
+            SQLiteCommand command = new SQLiteCommand(dbConn);
+            command.CommandText = "CREATE TABLE lookup (depth INT, state BLOB)";
+            command.ExecuteNonQuery();
+            command.CommandText = "CREATE INDEX indexer ON lookup(state)";
+            command.ExecuteNonQuery();
+            dbConn.Close();
+        }
+
+        /// <summary>
+        /// Function will encode NPuzzle to byte[] array
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public static byte[] EncodePuzzleState(NPuzzle state)
+        {
+            byte[] result = new byte[state.Rows * state.Columns];
+            int i = 0;
+            for (int x = 0; x < state.Rows; x++)
+                for (int y = 0; y < state.Columns; y++) result[i++] = state.ByteState[x, y];
+            return result;
+        }
+
+        /// <summary>
+        /// Function will decode byte array to NPuzzle
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="rows">Number of rows of puzzle</param>
+        /// <param name="columns">Number of columns of puzzle</param>
+        /// <returns></returns>
+        public static NPuzzle DecodePuzzleState(byte[] state, byte rows, byte columns)
+        {
+            byte[,] byteState = new byte[rows, columns];
+            byte i = 0;
+            byte spacePosition = 0;
+            for (int x = 0; x < rows; x++)
+                for (int y = 0; y < columns; y++)
+                {
+                    if (byteState[x, y] == 0) spacePosition = i;
+                    byteState[x, y] = state[i++];
+                }
+            return new NPuzzle(byteState, spacePosition);
+        }
+
+
+        public static void InsertRecordIntoLookupDb(GraphNodeSimple<NPuzzle> nodeData)
+        {
+            string dbname = "Lookup" + nodeData.node.Rows + "-" + nodeData.node.Columns + ".sqlite";
+            SQLiteConnection dbConn = new SQLiteConnection("Data Source=" + dbname + ";Version=3");
+            dbConn.Open();
+
+            byte[] encodedPuzzleState = EncodePuzzleState(nodeData.node);
+
+            SQLiteCommand command = new SQLiteCommand(dbConn);
+            command.CommandText = "INSERT INTO lookup (depth, state) VALUES (" + nodeData.graphDepth + ", @state)";
+            command.Parameters.Add("@state", System.Data.DbType.Binary, encodedPuzzleState.Length).Value = encodedPuzzleState;
+            command.ExecuteNonQuery();
+
+            dbConn.Close();
+        }
+
+        public static void InsertMultiRecordsIntoLookupDb(GraphNodeSimple<NPuzzle>[] nodeData)
+        {
+            string dbname = "Lookup" + nodeData[0].node.Rows + "-" + nodeData[0].node.Columns + ".sqlite";
+            SQLiteConnection dbConn = new SQLiteConnection("Data Source=" + dbname + ";Version=3");
+            dbConn.Open();
+
+            byte[] encodedPuzzleState = null;
+            SQLiteCommand command;
+
+            for (int i = 0; i < nodeData.Length; i++)
+            {
+                if (i % 1000 == 0) Console.WriteLine("Currently at record: " + i);
+                encodedPuzzleState = EncodePuzzleState(nodeData[i].node);
+
+                command = new SQLiteCommand(dbConn);
+                command.CommandText = "INSERT INTO lookup (depth, state) VALUES (" + nodeData[i].graphDepth + ", @state)";
+                command.Parameters.Add("@state", System.Data.DbType.Binary, encodedPuzzleState.Length).Value = encodedPuzzleState;
+                command.ExecuteNonQuery();
+            }
+
+            dbConn.Close();
+        }
+
+        public static int HeuristicLookUpTable(NPuzzle startState, NPuzzle finishState)
+        {
+            string dbname = "Lookup" + startState.Rows + "-" + startState.Columns + ".sqlite";
+            SQLiteConnection dbConn = new SQLiteConnection("Data Source=" + dbname + ";Version=3");
+            dbConn.Open();
+
+            byte[] encodedStartPuzzleState = EncodePuzzleState(startState);
+            byte[] encodedFinishPuzzleState = EncodePuzzleState(finishState);
+            int startDepth;
+            int finishDepth;
+
+            SQLiteCommand command = new SQLiteCommand(dbConn);
+            command.CommandText = "SELECT depth FROM lookup WHERE state=@state";
+            command.Parameters.Add("@state", System.Data.DbType.Binary, encodedStartPuzzleState.Length).Value = encodedStartPuzzleState;
+            SQLiteDataReader reader = command.ExecuteReader();
+            reader.Read();
+            startDepth = (int)reader["depth"];
+
+            command = new SQLiteCommand(dbConn);
+            command.CommandText = "SELECT depth FROM lookup WHERE state=@state";
+            command.Parameters.Add("@state", System.Data.DbType.Binary, encodedFinishPuzzleState.Length).Value = encodedFinishPuzzleState;
+            reader = command.ExecuteReader();
+            reader.Read();
+            finishDepth = (int)reader["depth"];
+
+            dbConn.Close();
+
+            return Math.Abs(startDepth - finishDepth);
+        }
+
     }
 }

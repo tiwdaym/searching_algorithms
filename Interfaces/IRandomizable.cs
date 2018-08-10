@@ -9,7 +9,7 @@ namespace SearchingAlgorithms
     /// Interface defines genertion of Random values for Type T
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    interface IRandomizable<T>
+    public interface IRandomizable<T>
     {
         /// <summary>
         /// Function Returns next random for the type

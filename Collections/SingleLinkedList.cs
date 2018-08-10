@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    class SingleLinkedList<T> : ISimpleCollection<T>
+    public class SingleLinkedList<T> : ISimpleCollection<T>
         where T : IEquatable<T>
     {
         private SingleLinkedNode<T> root;
@@ -103,6 +103,7 @@ namespace SearchingAlgorithms
                 if (node.Value.Equals(item)) return true;
                 node = node.Next;
             }
+            if (node.Value.Equals(item)) return true;
             return false;
         }
 

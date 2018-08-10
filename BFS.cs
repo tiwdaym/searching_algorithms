@@ -115,68 +115,7 @@ namespace SearchingAlgorithms
             FinishState = finishState;
         }
 
-        /// <summary>
-        /// Function will generate all possible states in graph sorted by depth.
-        /// Count of states is defined by MaxGeneratedElementsCount
-        /// </summary>
-        /// <param name="statesDepth">Use 0 if you want all states from 0 to Maximum Dpeth defined.
-        /// Or use any number if you want ONLY states in that specified statesDepth (eg. dpeth 3 will return only states in depth of 3)</param>
-        /// <returns></returns>
-        public GraphNodeSimple<T>[] GenerateStates(uint statesDepth = 0)
-        {
-            GraphNodeSimple<T> currentGraphNode;
-            T tempTState;
-            SingleLinkedList<GraphNodeSimple<T>> generatedNodes = new SingleLinkedList<GraphNodeSimple<T>>();
-
-            //initialization
-            isProcessingChangesDisabled = true;
-            openSet = new HeapMinList<GraphNodeSimple<T>>(maxGeneratedElementsCount);
-            closedSet = new HashList<GraphNodeSimple<T>>(hashSize, maxGeneratedElementsCount);
-
-            startTime = DateTime.UtcNow;
-
-            //1. add first element
-            openSet.Add(new GraphNodeSimple<T>(startState, null, null, 0));
-
-            //2. Repeat until openSet have generated nodes
-            while (openSet.Count > 0)
-            {
-
-                //3. Get first min node from graph and save it to list of generatedNodes if depth applies
-                currentGraphNode = openSet.RemoveMin();
-                if ((statesDepth == 0 || statesDepth == currentGraphNode.graphDepth) && generatedNodes.Count < maxGeneratedElementsCount) generatedNodes.Add(currentGraphNode);
-
-                //4. add current node to hash
-                closedSet.Add(currentGraphNode);
-
-                //5. create childs (neighbours) of current node and add them to open and closed set for checking
-                string[] operationsList = currentGraphNode.node.OperationsList();
-                for (int i = (operationsList.Length - 1); i >= 0; i--)
-                {
-                    tempTState = currentGraphNode.node.GenerateNewState(operationsList[i]);
-                    if (tempTState == null) continue;
-                    GraphNodeSimple<T> tmpGraphNode = new GraphNodeSimple<T>(tempTState, currentGraphNode, operationsList[i], currentGraphNode.graphDepth + 1);
-                    if (closedSet.Contains(tmpGraphNode)) continue;
-                    openSet.Add(tmpGraphNode);
-                    closedSet.Add(tmpGraphNode);
-                }
-
-                //6. additional check if we should end the loop
-                if (generatedNodes.Count >= maxGeneratedElementsCount ||
-                    (statesDepth != 0 && statesDepth < currentGraphNode.graphDepth) ||
-                    ((maxSearchingDepth != 0) && (currentGraphNode.graphDepth > maxSearchingDepth)) ||
-                    ((maxSearchingTime != 0) && ((DateTime.UtcNow).Subtract(startTime).TotalMilliseconds > maxSearchingTime)))
-                {
-                    break;
-                }
-            }
-
-            ResetProcessing();
-
-            //7. Return generated ndoes as list.
-            return generatedNodes.ToList();
-        }
-
+        
         /// <summary>
         /// Function call will find Path by default set parameters
         /// </summary>

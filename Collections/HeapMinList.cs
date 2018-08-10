@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class HeapMinList<T>
+    public class HeapMinList<T>
         where T : IComparable<T>, IEquatable<T>
     {
         public const uint DEFAULT_MAX_ELEMENTS = 65536;

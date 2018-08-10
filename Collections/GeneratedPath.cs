@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class GeneratedPath<T>
+    public class GeneratedPath<T>
     {
         public T[] pathStates; //states
         public string[] pathOperations; //operations

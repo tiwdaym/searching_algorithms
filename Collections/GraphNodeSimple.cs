@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class GraphNodeSimple<T> : IComparable<GraphNodeSimple<T>>, IHashable, IEquatable<GraphNodeSimple<T>>
+    public class GraphNodeSimple<T> : IComparable<GraphNodeSimple<T>>, IHashable, IEquatable<GraphNodeSimple<T>>
         where T:IEquatable<T>, IHashable
     {
         public readonly T node;

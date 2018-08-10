@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Collections
 {
-    class StackList<T>
+    public class StackList<T>
     {
         public const uint DEFAULT_MAX_ELEMENTS = 65536;
 

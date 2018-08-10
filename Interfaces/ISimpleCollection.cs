@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    interface ISimpleCollection<T>
+    public interface ISimpleCollection<T>
     {
         /// <summary>
         /// This should Retrun number of valid elements in Collection

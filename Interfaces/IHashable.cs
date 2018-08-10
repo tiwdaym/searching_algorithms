@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms
 {
-    interface IHashable
+    public interface IHashable
     {
         /// <summary>
         /// Function is used to generate hash of actual instance.
