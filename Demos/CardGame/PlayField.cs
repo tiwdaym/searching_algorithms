@@ -5,8 +5,9 @@ using System.Text;
 
 namespace SearchingAlgorithms.Demos.CardGame
 {
-    public class CardDeck
+    public class PlayField
     {
-        public Card[] Deck { get; set; }
+        public Card[] EnemyCards { get; set; }
+        public Card[] FriendlyCards { get; set; }
     }
 }

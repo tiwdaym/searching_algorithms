@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Demos.CardGame
 {
-    class Card
+    public class Card
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -18,5 +18,9 @@ namespace SearchingAlgorithms.Demos.CardGame
         public int CurrentCost { get; set; }
         public int CurrentHealth { get; set; }
         public int CurrentAttack { get; set; }
+
+        public Ability[] Abilities { get; set; }
+
+        public Ability[] ActiveAbilities { get; set; }
     }
 }
