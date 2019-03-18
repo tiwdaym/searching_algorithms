@@ -69,6 +69,8 @@
     <Compile Include="Collections\HeapMaxList.cs" />
     <Compile Include="Collections\HeapMinList.cs" />
     <Compile Include="Collections\StackList.cs" />
+    <Compile Include="Demos\CardGame\Card.cs" />
+    <Compile Include="Demos\CardGame\CardDeck.cs" />
     <Compile Include="Emulators\CPUEmulator.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="Collections\HashList.cs" />
