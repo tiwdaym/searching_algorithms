@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.Demos.CardGame
 {
-    public class Card
+    public class Card : IEquatable<Card>
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -22,5 +22,10 @@ namespace SearchingAlgorithms.Demos.CardGame
         public Ability[] Abilities { get; set; }
 
         public Ability[] ActiveAbilities { get; set; }
+
+        public bool Equals(Card other)
+        {
+            return this.Id == other.Id;
+        }
     }
 }
