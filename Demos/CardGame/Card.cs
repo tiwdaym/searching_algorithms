@@ -21,11 +21,11 @@ namespace SearchingAlgorithms.Demos.CardGame
 
         public Ability[] Abilities { get; set; }
 
-        public Ability[] ActiveAbilities { get; set; }
+        public Status[] Statuses { get; set; }
 
         public bool Equals(Card other)
         {
-            return this.Id == other.Id;
+            return this == other;
         }
     }
 }
