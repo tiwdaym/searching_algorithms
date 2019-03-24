@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SearchingAlgorithms.MachineLearning
 {
-    class SimpleLinearRegression
+    public class SimpleLinearRegression
     {
     }
 }
