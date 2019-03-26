@@ -76,6 +76,37 @@ namespace SearchingAlgorithms
             return false;
         }
 
+        public bool Remove(int key)
+        {
+            if (this.count < key) throw new IndexOutOfRangeException();
+            if (key == 0)
+            {
+                if (count == 1)
+                {
+                    root = null;
+                } else
+                {
+                    root = root.Next;
+                }
+                count--;
+                return true;
+            }
+            SingleLinkedNode<T> node = root;
+            int i = 1;
+            while (node != null)
+            {
+                if (i == key)
+                {
+                    node.Next = node.Next.Next;
+                    count--;
+                    return true;
+                }
+                i++;
+                node = node.Next;
+            }
+            return false;
+        }
+
         public void Clear()
         {
             SingleLinkedNode<T> nodeToDelete = root;
@@ -147,6 +178,51 @@ namespace SearchingAlgorithms
                 node = node.Next;
             }
             return list;
+        }
+
+
+
+        public T this[int key]
+        {
+            get
+            {
+                return GetValue(key);
+            }
+            set
+            {
+                SetValue(key, value);
+            }
+        }
+
+        private void SetValue(int key, T value)
+        {
+            if (this.count < key) throw new IndexOutOfRangeException();
+            SingleLinkedNode<T> node = root;
+            int i = 0;
+            while (node != null)
+            {
+                if (i == key)
+                {
+                    node.Value = value;
+                    return;
+                }
+                i++;
+                node = node.Next;
+            }
+        }
+
+        private T GetValue(int key)
+        {
+            if (this.count < key) throw new IndexOutOfRangeException();
+            SingleLinkedNode<T> node = root;
+            int i = 0;
+            while(node != null)
+            {
+                if (i == key) return node.Value;
+                i++;
+                node = node.Next;
+            }
+            return default(T);
         }
     }
 }
