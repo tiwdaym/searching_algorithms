@@ -11,5 +11,12 @@ namespace SearchingAlgorithms.Demos.CardGame
         public string Name { get; set; }
         public string Description { get; set; }
         public int Value { get; set; }
+
+        public static Stat LoadFromJson(string json)
+        {
+            Stat stat = new Stat();
+            
+            return stat;
+        }
     }
 }

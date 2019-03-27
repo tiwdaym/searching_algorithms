@@ -17,5 +17,12 @@ namespace SearchingAlgorithms.Demos.CardGame
         {
 
         }
+
+        public static Status LoadFromJson(string json)
+        {
+            Status status = new Status();
+
+            return status;
+        }
     }
 }

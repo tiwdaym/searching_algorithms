@@ -7,6 +7,8 @@ namespace SearchingAlgorithms.Demos.CardGame
 {
     public class Card : IEquatable<Card>
     {
+
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -20,6 +22,13 @@ namespace SearchingAlgorithms.Demos.CardGame
         public bool Equals(Card other)
         {
             return this == other;
+        }
+
+        public static Card LoadFromJson(string json)
+        {
+            Card card = new Card();
+
+            return card;
         }
     }
 }

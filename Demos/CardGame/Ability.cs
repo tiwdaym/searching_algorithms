@@ -15,5 +15,12 @@ namespace SearchingAlgorithms.Demos.CardGame
         {
 
         }
+
+        public static Ability LoadFromJson(string json)
+        {
+            Ability ability = new Ability();
+
+            return ability;
+        }
     }
 }
