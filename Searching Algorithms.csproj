@@ -66,8 +66,11 @@
     <Compile Include="Collections\GeneratedPath.cs" />
     <Compile Include="Collections\GraphNodeComplex.cs" />
     <Compile Include="Collections\GraphNodeSimple.cs" />
+    <Compile Include="Collections\HashableString.cs" />
     <Compile Include="Collections\HeapMaxList.cs" />
     <Compile Include="Collections\HeapMinList.cs" />
+    <Compile Include="Collections\Json.cs" />
+    <Compile Include="Collections\JsonKeyVal.cs" />
     <Compile Include="Collections\StackList.cs" />
     <Compile Include="Demos\CardGame\Ability.cs" />
     <Compile Include="Demos\CardGame\Card.cs" />
