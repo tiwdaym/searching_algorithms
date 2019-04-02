@@ -17,6 +17,7 @@ namespace SearchingAlgorithms
         private uint count; //actual number of elements in hash
 
         public uint Count { get => count; }
+        public bool EnableHashSizeGrow { get; set; } = false;
 
         /// <summary>
         /// Constructor will create hash table.
@@ -74,9 +75,62 @@ namespace SearchingAlgorithms
             //3. if item is already in hash, then do not add new
             if (hashTable[hash].Contains(item)) return;
 
-            //4. Add item to linked list
+            //4. check if we should grow hashtable
+            if (EnableHashSizeGrow &&
+                (hashTableSize * 2 > hashTableSize) &&
+                (hashTableSize * 2 < maxElementsCount) &&
+                (count > hashTableSize * 2))
+            {
+                if (!GrowHashSize()) EnableHashSizeGrow = false;
+            }
+
+            //5. Add item to linked list
             hashTable[hash].Add(item);
             this.count++;
+        }
+
+        private bool GrowHashSize()
+        {
+            T[] allElements;
+            try
+            {
+                allElements = ToList();
+            }
+            catch (OutOfMemoryException)
+            {
+                return false;
+            }
+
+            SingleLinkedList<T>[] oldTable = hashTable;
+            uint oldCount = count;
+            hashTableSize *= 2;
+            hashTable = new SingleLinkedList<T>[hashTableSize];
+            count = 0;
+            if (hashTable == null)
+            {
+                hashTable = oldTable;
+                hashTableSize /= 2;
+                count = oldCount;
+                return false;
+            }
+            try
+            {
+                EnableHashSizeGrow = false;
+                foreach (T rehashItem in allElements)
+                {
+                    Add(rehashItem);
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                EnableHashSizeGrow = true;
+                hashTable = oldTable;
+                hashTableSize /= 2;
+                count = oldCount;
+                return false;
+            }
+            EnableHashSizeGrow = true;
+            return true;
         }
 
         /// <summary>
@@ -95,7 +149,7 @@ namespace SearchingAlgorithms
         /// <summary>
         /// Function will remove hash node from list
         /// </summary>
-        /// <param name="currentState">graphState to remove</param>
+        /// <param name="item">item to remove</param>
         public bool Remove(T item)
         {
 
