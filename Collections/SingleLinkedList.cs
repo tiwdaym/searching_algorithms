@@ -151,12 +151,12 @@ namespace SearchingAlgorithms
             SingleLinkedNode<T> node = root;
             while (node.Next != null)
             {
+                node = node.Next;
                 if (node.Value.Equals(item))
                 {
                     foundValue = node.Value;
                     return true;
                 }
-                node = node.Next;
             }
             return false;
         }

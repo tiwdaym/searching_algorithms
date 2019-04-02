@@ -49,7 +49,7 @@ namespace SearchingAlgorithms
             uint seed = 101;
             int size = string.Length;
             for (int i = 0; i < size; i++) hash = hash * seed + string[i];*/
-            return value.GetHash() % this.maxElementsCount;
+            return value.GetHash() % this.hashTableSize;
         }
 
         /// <summary>

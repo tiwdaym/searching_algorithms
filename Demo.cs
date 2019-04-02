@@ -41,6 +41,9 @@ public class Demo
                 case "makedb":
                     NPuzzle.InitDatabaseForWholeHeuristic(3, 3);
                     break;
+                case "json":
+                    RunJsonTests();
+                    break;
                 case "help":
                 default:
                     Console.WriteLine("Current commands available:\n" +
@@ -49,11 +52,66 @@ public class Demo
                         "reader - run reader\n" +
                         "evo-heur - evolution heuristics search\n" +
                         "generator - generator of states\n" +
-                        "solver - solver of puzzle");
+                        "solver - solver of puzzle\n" +
+                        "json - json checker");
                     break;
             }
             Console.WriteLine("Enter demo command to run that demo. Help for list of commands.");
         }
+    }
+
+    void RunJsonTests()
+    {
+        string demoJson = @"{
+            ""integer"":0,
+            ""integerS"" :1,
+            ""integerS2"": 2,
+            ""integerS3"" : 3 ,
+            ""integerS4"" : 3 ,
+            ""array"" : [
+                    true,
+                    false,
+                    null,
+                    0.5,
+                    2e5,
+                    -0.5e+27,
+                    ""something"",
+                    {
+                        ""inObject"" : ""myValue"",
+                        ""simple"" : null,
+                        ""number"" : -5.2E-25
+                    },[0,1,2]
+                    ] ,
+            ""objInObj"" : {
+                            ""theKey"" : ""myValue""
+                            }
+            }";
+        Json json = Json.DecodeJsonFromString(demoJson);
+        Console.WriteLine("The object data:");
+        Console.WriteLine($@"{{
+            ""integer"":{json["integer"].NValue},
+            ""integerS"" :{json["integerS"].NValue},
+            ""integerS2"": {json["integerS2"].NValue},
+            ""integerS3"" : {json["integerS3"].NValue} ,
+            ""integerS4"" : {json["integerS4"].NValue} ,
+            ""array"" : [
+                    {json["array"][0].BValue},
+                    {json["array"][1].BValue},
+                    {json["array"][2].Value},
+                    {json["array"][3].NValue},
+                    {json["array"][4].NValue},
+                    {json["array"][5].NValue},
+                    {json["array"][6].Value},
+                    {{
+                        ""inObject"" : ""{json["array"][7]["inObject"].Value}"",
+                        ""simple"" : {json["array"][7]["simple"].Value},
+                        ""number"" : {json["array"][7]["number"].NValue}
+                    }},[{json["array"][8][0].NValue},{json["array"][8][1].NValue},{json["array"][8][2].NValue}]
+                    ] ,
+            ""objInObj"" : {{
+                            ""theKey"" : {json["objInObj"]["theKey"].Value}
+                            }}
+            }}");
     }
 
 

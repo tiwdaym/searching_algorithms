@@ -21,7 +21,7 @@ namespace SearchingAlgorithms.Collections
 
         public double? NValue { get => nValue; set { linkedList = null; hashList = null; this.value = null; bValue = null; nValue = value; } }
         public bool? BValue { get => bValue; set { linkedList = null; hashList = null; this.value = null; nValue = null; bValue = value; } }
-        public string Value { get => value; set { linkedList = null; hashList = null; nValue = null; bValue = null; this.value = null; } }
+        public string Value { get => value; set { linkedList = null; hashList = null; nValue = null; bValue = null; this.value = value; } }
 
         public bool IsObject()
         {
@@ -116,29 +116,45 @@ namespace SearchingAlgorithms.Collections
 
         public static Json DecodeJsonFromString(string json)
         {
-            Json jsonObject = new Json();
             jsonLength = json.Length;
             jsonPosition = 0;
             EatWhiteSpaces(ref json);
             while (jsonPosition < jsonLength)
             {
-                switch (json[jsonPosition++])
+                switch (json[jsonPosition])
                 {
                     case '{':
-                        jsonObject.hashList = new HashList<Json>(hashSize, hashElementCount) { EnableHashSizeGrow = true };
-                        jsonObject.hashList.Add(NewJsonObject(ref json));
-                        break;
+                        jsonPosition++;
+                        return NewJsonObject(ref json);
                     case '"':
-                        break;
+                        jsonPosition++;
+                        return NewJsonString(ref json);
                     case '[':
-                        break;
+                        jsonPosition++;
+                        return NewJsonArray(ref json);
+                    case 'n':
+                        return NewJsonNull(ref json);
+                    case 't':
+                    case 'f':
+                        return NewJsonBoolean(ref json);
+                    case '-':
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        return NewJsonNumber(ref json);
                     default:
-                        jsonPosition--;
-                        throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: {{ or \" or [");
+                        throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: {{ or \" or [ or - or 0-9 or true or false or null");
                 }
             }
 
-            return jsonObject;
+            return null;
         }
 
         static Json NewJsonArray(ref string json)
@@ -194,6 +210,9 @@ namespace SearchingAlgorithms.Collections
                         Json jsonNumber = NewJsonNumber(ref json);
                         result.linkedList.Add(jsonNumber);
                         break;
+                    case ']':
+                        jsonPosition++;
+                        return result;
                     default:
                         throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: \"");
                 }
@@ -236,6 +255,7 @@ namespace SearchingAlgorithms.Collections
                 switch (json[jsonPosition])
                 {
                     case '"':
+                        jsonPosition++;
                         string key = GetString(ref json);
                         if (key == null || key == "") throw new FormatException($"Key cannot be null or empty string. At: {jsonPosition}");
 
@@ -245,6 +265,7 @@ namespace SearchingAlgorithms.Collections
                         switch (json[jsonPosition])
                         {
                             case ':':
+                                jsonPosition++;
                                 EatWhiteSpaces(ref json);
                                 if (jsonPosition >= jsonLength) throw new FormatException("Unfinished json string");
 
@@ -295,7 +316,6 @@ namespace SearchingAlgorithms.Collections
                                         result.hashList.Add(jsonNumber);
                                         break;
                                     default:
-                                        jsonPosition--;
                                         throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: {{ or \" or [");
                                 }
                                 break;
@@ -303,8 +323,11 @@ namespace SearchingAlgorithms.Collections
                                 throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: :");
                         }
                         break;
+                    case '}':
+                        jsonPosition++;
+                        return result;
                     default:
-                        throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: \"");
+                        throw new FormatException($"Invalid character at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: \" or }}");
                 }
 
                 EatWhiteSpaces(ref json);
@@ -438,11 +461,11 @@ namespace SearchingAlgorithms.Collections
                     for (int i = 0; i < 5; i++) newBoolean.Append(json[jsonPosition++]);
                     if (newBoolean.ToString() == "false")
                     {
-                        jsonPosition -= 5;
                         return false;
                     }
                     else
                     {
+                        jsonPosition -= 5;
                         throw new FormatException($"Invalid boolean sequence at: {jsonPosition}, value: {json[jsonPosition]}. Expecting: true or false");
                     }
                 default:
@@ -478,7 +501,7 @@ namespace SearchingAlgorithms.Collections
                 jsonPosition++;
                 if (IsNumberEnd(ref json))
                 {
-                    return double.Parse(newDouble.ToString(), NumberStyles.Float);
+                    return double.Parse(newDouble.ToString(), NumberStyles.Float, NumberFormatInfo.InvariantInfo);
                 }
                 if (json[jsonPosition] == '0') throw new FormatException($"Invalid number sequence at: {jsonPosition}, value: {json[jsonPosition]}. Expecting one of: .eE,]}}");
             }
@@ -486,7 +509,7 @@ namespace SearchingAlgorithms.Collections
             newDouble.Append(GetDigitSequence(ref json));
             if (IsNumberEnd(ref json))
             {
-                return double.Parse(newDouble.ToString(), NumberStyles.Float);
+                return double.Parse(newDouble.ToString(), NumberStyles.Float, NumberFormatInfo.InvariantInfo);
             }
 
             if (json[jsonPosition] == '.')
@@ -497,7 +520,7 @@ namespace SearchingAlgorithms.Collections
                 newDouble.Append(GetDigitSequence(ref json));
                 if (IsNumberEnd(ref json))
                 {
-                    return double.Parse(newDouble.ToString(), NumberStyles.Float);
+                    return double.Parse(newDouble.ToString(), NumberStyles.Float, NumberFormatInfo.InvariantInfo);
                 }
             }
 
@@ -515,7 +538,7 @@ namespace SearchingAlgorithms.Collections
                 newDouble.Append(GetDigitSequence(ref json));
                 if (IsNumberEnd(ref json))
                 {
-                    return double.Parse(newDouble.ToString(), NumberStyles.Float);
+                    return double.Parse(newDouble.ToString(), NumberStyles.Float, NumberFormatInfo.InvariantInfo);
                 }
             }
 
@@ -524,7 +547,7 @@ namespace SearchingAlgorithms.Collections
                 throw new FormatException($"Invalid number sequence at: {jsonPosition}, value: {json[jsonPosition]}. Expecting one of: ,]}}");
             }
             
-            return double.Parse(newDouble.ToString(), NumberStyles.Float);
+            return double.Parse(newDouble.ToString(), NumberStyles.Float, NumberFormatInfo.InvariantInfo);
         }
 
 
@@ -601,13 +624,13 @@ namespace SearchingAlgorithms.Collections
             if (key.Length <= 0) return default(uint);
             uint hash = key[0];
             int i = 0;
-            while (i < length) hash *= 101 + (uint)key[i++];
+            while (i < length) hash = hash * 101 + (uint)key[i++];
             return hash;
         }
 
         public bool Equals(Json other)
         {
-            return Value.Equals(other.Value);
+            return key.Equals(other.key);
         }
     }
 }
