@@ -14,7 +14,6 @@ namespace SearchingAlgorithms.Demos.CardGame
         public string Description { get; set; }
 
         public SingleLinkedList<Stat> Stats { get; set; }
-        public SingleLinkedList<Ability> Abilities { get; set; }
         public SingleLinkedList<Status> Statuses { get; set; }
 
         public bool Equals(Card other)

@@ -83,7 +83,8 @@ public class Demo
                     },[0,1,2]
                     ] ,
             ""objInObj"" : {
-                            ""theKey"" : ""myValue""
+                            ""theKey"" : ""myValue"",
+                            ""specials"": ""a\""\\\u0020a""
                             }
             }";
         Json json = Json.DecodeJsonFromString(demoJson);
@@ -109,7 +110,8 @@ public class Demo
                     }},[{json["array"][8][0].NValue},{json["array"][8][1].NValue},{json["array"][8][2].NValue}]
                     ] ,
             ""objInObj"" : {{
-                            ""theKey"" : {json["objInObj"]["theKey"].Value}
+                            ""theKey"" : ""{json["objInObj"]["theKey"].Value}"",
+                            ""specials"": ""{json["objInObj"]["specials"].Value}""
                             }}
             }}");
     }

@@ -11,6 +11,8 @@ namespace SearchingAlgorithms.Demos.CardGame
         public string Name { get; set; }
         public string Description { get; set; }
         public int Value { get; set; }
+        
+        public SingleLinkedList<Ability> Abilities { get; set; }
 
         public static Stat LoadFromString(string json)
         {
