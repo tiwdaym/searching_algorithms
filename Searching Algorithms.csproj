@@ -73,6 +73,7 @@
     <Compile Include="Demos\CardGame\Ability.cs" />
     <Compile Include="Demos\CardGame\Card.cs" />
     <Compile Include="Demos\CardGame\CardDeck.cs" />
+    <Compile Include="Demos\CardGame\Demo.cs" />
     <Compile Include="Demos\CardGame\PlayField.cs" />
     <Compile Include="Demos\CardGame\Stat.cs" />
     <Compile Include="Demos\CardGame\Status.cs" />
@@ -131,6 +132,9 @@
     <None Include=".git\smartgit.config" />
     <None Include=".git\smartgit\logcache\nodes" />
     <None Include="App.config" />
+    <Content Include="Demos\CardGame\Data\demoDataJson.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

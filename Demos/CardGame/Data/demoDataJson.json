@@ -1,0 +1,47 @@
+{
+  "abilities": [
+    {
+      "id": 1,
+      "name": "death",
+      "description": "Ability will remove card from play."
+    },
+    {
+      "id": 2,
+      "name": "attack-basic",
+      "description": "Ability will inflict basic attack damage"
+    }
+  ],
+  "stats": [
+    {
+      "id": 1,
+      "name": "health",
+      "description": "Main health stat.",
+      "abilities": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "name": "attack-basic",
+      "description": "Main attack stat.",
+      "abilities": [
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "name": "delay",
+      "description": "Cooldown wait, how many turns card have to wait to activate."
+    }
+  ],
+  "cards": [
+    {
+      "id": 1,
+      "name": "default",
+      "description": "This is default placeholder card",
+      "stats": [
+        1,2,3
+      ]
+    }
+  ]
+}

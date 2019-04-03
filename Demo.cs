@@ -44,20 +44,32 @@ public class Demo
                 case "json":
                     RunJsonTests();
                     break;
+                case "card-demo":
+                    RunCardDemo();
+                    break;
                 case "help":
                 default:
-                    Console.WriteLine("Current commands available:\n" +
-                        "help - show this help\n" +
-                        "exit - exits program\n" +
-                        "reader - run reader\n" +
-                        "evo-heur - evolution heuristics search\n" +
-                        "generator - generator of states\n" +
-                        "solver - solver of puzzle\n" +
-                        "json - json checker");
+                    Console.WriteLine(
+@"Current commands available:
+help - show this help
+exit - exits program
+reader - run reader
+evo-heur - evolution heuristics search
+generator - generator of states
+solver - solver of puzzle
+json - json checker
+card-demo - card game demo"
+                        );
                     break;
             }
             Console.WriteLine("Enter demo command to run that demo. Help for list of commands.");
         }
+    }
+
+    void RunCardDemo()
+    {
+        SearchingAlgorithms.Demos.CardGame.Demo cardDemo = new SearchingAlgorithms.Demos.CardGame.Demo();
+        cardDemo.Run();
     }
 
     void RunJsonTests()
