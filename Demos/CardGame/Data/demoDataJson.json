@@ -2,11 +2,19 @@
   "abilities": [
     {
       "id": 1,
+      "type": "bool",
+      "name": "play",
+      "description": "This ability enables play of card"
+    },
+    {
+      "id": 1,
+      "type": "bool",
       "name": "death",
       "description": "Ability will remove card from play."
     },
     {
-      "id": 2,
+      "id": 100,
+      "type": "int",
       "name": "attack-basic",
       "description": "Ability will inflict basic attack damage"
     }
@@ -14,6 +22,7 @@
   "stats": [
     {
       "id": 1,
+      "type": "int",
       "name": "health",
       "description": "Main health stat.",
       "abilities": [
@@ -22,6 +31,7 @@
     },
     {
       "id": 2,
+      "type": "int",
       "name": "attack-basic",
       "description": "Main attack stat.",
       "abilities": [
@@ -30,8 +40,63 @@
     },
     {
       "id": 3,
+      "type": "int",
       "name": "delay",
       "description": "Cooldown wait, how many turns card have to wait to activate."
+    },
+    {
+      "id": 100,
+      "type": "void",
+      "name": "common",
+      "description": "Common type of card."
+    },
+    {
+      "id": 101,
+      "type": "void",
+      "name": "rare",
+      "description": "Rare type of card."
+    },
+    {
+      "id": 102,
+      "type": "void",
+      "name": "epic",
+      "description": "Epic type of card."
+    },
+    {
+      "id": 103,
+      "type": "void",
+      "name": "legendary",
+      "description": "Legendary type of card."
+    },
+    {
+      "id": 104,
+      "type": "void",
+      "name": "mythic",
+      "description": "Mythic type of card."
+    },
+    {
+      "id": 1000,
+      "type": "void",
+      "name": "aether",
+      "description": "Aether faction card."
+    },
+    {
+      "id": 2000,
+      "type": "void",
+      "name": "standard",
+      "description": "Card is from standard set."
+    },
+    {
+      "id": 3000,
+      "type": "int",
+      "name": "upgrade",
+      "description": "Upgrade level of current card."
+    },
+    {
+      "id": 3001,
+      "type": "int",
+      "name": "fusion",
+      "description": "Fusion level of current card."
     }
   ],
   "cards": [
@@ -40,7 +105,66 @@
       "name": "default",
       "description": "This is default placeholder card",
       "stats": [
-        1,2,3
+
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Pegasus",
+      "description": "\"Description\" - Something 'descriptive'.",
+      "stats": [
+        {
+          "id": 1,
+          "value": 2
+        },
+        {
+          "id": 2,
+          "value": 1
+        },
+        {
+          "id": 3,
+          "value": 0
+        },
+        100,
+        1000,
+        {
+          "id": 3000,
+          "value": 1
+        },
+        {
+          "id": 3001,
+          "value": 1
+        }
+      ],
+      "abilities": [
+      ]
+    },
+    {
+      "id": 3,
+      "parent": 2,
+      "stats": [
+        {
+          "id": 1,
+          "value": 4
+        },
+        {
+          "id": 3000,
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "parent": 2,
+      "stats": [
+        {
+          "id": 1,
+          "value": 6
+        },
+        {
+          "id": 3000,
+          "value": 3
+        }
       ]
     }
   ]
