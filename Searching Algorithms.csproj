@@ -74,6 +74,7 @@
     <Compile Include="Demos\CardGame\Card.cs" />
     <Compile Include="Demos\CardGame\CardDeck.cs" />
     <Compile Include="Demos\CardGame\Demo.cs" />
+    <Compile Include="Demos\CardGame\JsonLoader.cs" />
     <Compile Include="Demos\CardGame\PlayField.cs" />
     <Compile Include="Demos\CardGame\Stat.cs" />
     <Compile Include="Demos\CardGame\Status.cs" />

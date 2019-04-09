@@ -1,103 +1,170 @@
 {
-  "abilities": [
-    {
-      "id": 1,
-      "type": "bool",
-      "name": "play",
-      "description": "This ability enables play of card"
-    },
-    {
-      "id": 1,
-      "type": "bool",
-      "name": "death",
-      "description": "Ability will remove card from play."
-    },
-    {
-      "id": 100,
-      "type": "int",
-      "name": "attack-basic",
-      "description": "Ability will inflict basic attack damage"
-    }
-  ],
   "stats": [
     {
       "id": 1,
       "type": "int",
       "name": "health",
       "description": "Main health stat.",
-      "abilities": [
-        1
-      ]
+      "parser-value-name": "health"
     },
     {
       "id": 2,
       "type": "int",
-      "name": "attack-basic",
-      "description": "Main attack stat.",
-      "abilities": [
-        2
-      ]
+      "name": "health-starting",
+      "description": "Starting health of card (computed from all effects before play)",
+      "parser-value-name": "health-starting"
     },
     {
       "id": 3,
       "type": "int",
+      "name": "health-current",
+      "description": "Current health of card (used when interacting with other cards)",
+      "parser-value-name": "health-current"
+    },
+    {
+      "id": 10,
+      "type": "int",
+      "name": "attack",
+      "description": "Main attack stat.",
+      "parser-value-name": "attack"
+    },
+    {
+      "id": 11,
+      "type": "int",
+      "name": "attack-starting",
+      "description": "Current health of card (used when interacting with other cards)",
+      "parser-value-name": "attack-starting"
+    },
+    {
+      "id": 12,
+      "type": "int",
+      "name": "attack-current",
+      "description": "Current health of card (used when interacting with other cards)",
+      "parser-value-name": "attack-current"
+    },
+    {
+      "id": 20,
+      "type": "int",
       "name": "delay",
-      "description": "Cooldown wait, how many turns card have to wait to activate."
+      "description": "Cooldown wait, how many turns card have to wait to activate.",
+      "parser-value-name": "delay"
+    },
+    {
+      "id": 21,
+      "type": "int",
+      "name": "delay-starting",
+      "description": "Cooldown wait, how many turns card have to wait to activate.",
+      "parser-value-name": "delay-starting"
+    },
+    {
+      "id": 22,
+      "type": "int",
+      "name": "delay-current",
+      "description": "Cooldown wait, how many turns card have to wait to activate.",
+      "parser-value-name": "delay-current"
     },
     {
       "id": 100,
-      "type": "void",
+      "type": "bool",
       "name": "common",
-      "description": "Common type of card."
+      "description": "Common type of card.",
+      "parser-value-name": "common"
     },
     {
       "id": 101,
-      "type": "void",
+      "type": "bool",
       "name": "rare",
-      "description": "Rare type of card."
+      "description": "Rare type of card.",
+      "parser-value-name": "rare"
     },
     {
       "id": 102,
-      "type": "void",
+      "type": "bool",
       "name": "epic",
-      "description": "Epic type of card."
+      "description": "Epic type of card.",
+      "parser-value-name": "epic"
     },
     {
       "id": 103,
-      "type": "void",
+      "type": "bool",
       "name": "legendary",
-      "description": "Legendary type of card."
+      "description": "Legendary type of card.",
+      "parser-value-name": "legendary"
     },
     {
       "id": 104,
-      "type": "void",
+      "type": "bool",
       "name": "mythic",
-      "description": "Mythic type of card."
+      "description": "Mythic type of card.",
+      "parser-value-name": "mythic"
     },
     {
       "id": 1000,
-      "type": "void",
+      "type": "bool",
       "name": "aether",
-      "description": "Aether faction card."
+      "description": "Aether faction card.",
+      "parser-value-name": "aether"
     },
     {
       "id": 2000,
-      "type": "void",
+      "type": "bool",
       "name": "standard",
-      "description": "Card is from standard set."
+      "description": "Card is from standard set.",
+      "parser-value-name": "standard"
     },
     {
       "id": 3000,
       "type": "int",
       "name": "upgrade",
-      "description": "Upgrade level of current card."
+      "description": "Upgrade level of current card.",
+      "parser-value-name": "upgrade"
     },
     {
       "id": 3001,
       "type": "int",
       "name": "fusion",
-      "description": "Fusion level of current card."
+      "description": "Fusion level of current card.",
+      "parser-value-name": "fusion"
     }
+  ],
+  "abilities": [
+    {
+      "id": 1,
+      "type": "bool",
+      "name": "play",
+      "description": "This ability enables play of card",
+      "parser-value-name": "play"
+    },
+    {
+      "id": 2,
+      "type": "bool",
+      "name": "death",
+      "description": "Ability will remove card from play.",
+      "parser-value-name": "death"
+    },
+    {
+      "id": 1000,
+      "type": "int",
+      "name": "attack-basic",
+      "description": "Ability will inflict basic attack damage",
+      "parser-value-name": "attack"
+    },
+    {
+      "id": 1001,
+      "type": "int",
+      "name": "Heal ${if[0].name}",
+      "description": "Ability will heal target",
+      "find": [
+
+      ],
+      "ifs": {
+
+      },
+      "parser-value-name": "heal"
+    }
+  ],
+  "statuses": [
+    
   ],
   "cards": [
     {
@@ -105,67 +172,173 @@
       "name": "default",
       "description": "This is default placeholder card",
       "stats": [
-
+        1,
+        2
       ]
     },
     {
-      "id": 2,
+      "id": 10000,
       "name": "Pegasus",
       "description": "\"Description\" - Something 'descriptive'.",
       "stats": [
         {
-          "id": 1,
-          "value": 2
-        },
-        {
-          "id": 2,
-          "value": 1
-        },
-        {
-          "id": 3,
-          "value": 0
-        },
-        100,
-        1000,
-        {
-          "id": 3000,
-          "value": 1
-        },
-        {
-          "id": 3001,
-          "value": 1
+          "health": 2,
+          "attack": 1,
+          "delay": 0,
+          "standard": true,
+          "common": true,
+          "aether": true,
+          "upgrade": 0,
+          "fusion": 0
         }
       ],
       "abilities": [
+        {
+          "play": true,
+          "death": true,
+          "attack": true
+        }
       ]
+    },
+    {
+      "id": 10001,
+      "parent": 10000,
+      "stats": [
+        {
+          "health": 4,
+          "upgrade": 2
+        }
+      ]
+    },
+    {
+      "id": 10002,
+      "parent": 10001,
+      "stats": [
+        {
+          "health": 6,
+          "upgrade": 3
+        }
+      ]
+    },
+    {
+      "id": 10003,
+      "parent": 10002,
+      "name": "Stormcloud Pegasus",
+      "stats": [
+        {
+          "health": 7,
+          "upgrade": 0,
+          "fusion": 1
+        }
+      ]
+    },
+    {
+      "id": 10004,
+      "parent": 10003,
+      "stats": [
+        {
+          "health": 8,
+          "upgrade": 1
+        }
+      ]
+    },
+    {
+      "id": 10005,
+      "parent": 10004,
+      "stats": [
+        {
+          "attack": 2,
+          "upgrade": 2
+        }
+      ]
+    },
+    {
+      "id": 10006,
+      "parent": 10005,
+      "name": "Astral Pegasus",
+      "stats": [
+        {
+          "health": 9,
+          "upgrade": 0,
+          "fusion": 2
+        }
+      ]
+    },
+    {
+      "id": 10007,
+      "parent": 10006,
+      "stats": [
+        {
+          "health": 10,
+          "upgrade": 1
+        }
+      ]
+    },
+    {
+      "id": 10008,
+      "parent": 10007,
+      "stats": [
+        {
+          "upgrade": 2
+        }
+      ]
+    }
+  ],
+  "decks": [
+    {
+      "id": 1,
+      "name": "hand",
+      "type": "int-list",
+      "description": "Cards that are currently in hand",
+      "parser-value-name": "hand"
+    },
+    {
+      "id": 2,
+      "name": "deck",
+      "type": "int-list",
+      "description": "Cards that are currently in deck",
+      "parser-value-name": "deck"
     },
     {
       "id": 3,
-      "parent": 2,
-      "stats": [
-        {
-          "id": 1,
-          "value": 4
-        },
-        {
-          "id": 3000,
-          "value": 2
-        }
-      ]
-    },
+      "name": "board",
+      "type": "int-list",
+      "description": "Cards that are currently on board",
+      "parser-value-name": "board"
+    }
+  ],
+  "playfields": [
     {
-      "id": 4,
-      "parent": 2,
-      "stats": [
-        {
-          "id": 1,
-          "value": 6
-        },
-        {
-          "id": 3000,
-          "value": 3
-        }
-      ]
+      "id": 1,
+      "name": "main",
+      "type": "object",
+      "description": "The main playfield of the game",
+      "value": {
+        "players": [
+          {
+            "name": "player1",
+            "decks": {
+              "deck": true,
+              "hand": true,
+              "board": true
+            },
+            "cards": [
+
+            ]
+          },
+          {
+            "name": "player2",
+            "decks": {
+              "deck": true,
+              "hand": true,
+              "board": true
+            },
+            "cards": [
+
+            ]
+          }
+        ]
+      }
     }
   ]
 }
