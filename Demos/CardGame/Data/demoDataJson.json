@@ -164,7 +164,7 @@
     }
   ],
   "statuses": [
-    
+
   ],
   "cards": [
     {
@@ -178,108 +178,43 @@
     },
     {
       "id": 10000,
-      "name": "Pegasus",
+      "name": [ "Pegasus", "Stormcloud Pegasus", "Astral Pegasus" ],
       "description": "\"Description\" - Something 'descriptive'.",
       "stats": [
         {
-          "health": 2,
-          "attack": 1,
+          "health": [
+            [ 2, 4, 6 ],
+            [ 7, 8, 8 ],
+            [ 9, 10, 10 ]
+          ],
+          "attack": [
+            [ 1 ],
+            [ 1, 1, 2 ],
+            [ 2 ]
+          ],
           "delay": 0,
-          "standard": true,
-          "common": true,
-          "aether": true,
-          "upgrade": 0,
-          "fusion": 0
+          "type": [
+            "standard",
+            "common",
+            "aether"
+          ],
+          "upgrades": 3,
+          "fusions": 3
         }
       ],
       "abilities": [
         {
           "play": true,
           "death": true,
-          "attack": true
-        }
-      ]
-    },
-    {
-      "id": 10001,
-      "parent": 10000,
-      "stats": [
-        {
-          "health": 4,
-          "upgrade": 2
-        }
-      ]
-    },
-    {
-      "id": 10002,
-      "parent": 10001,
-      "stats": [
-        {
-          "health": 6,
-          "upgrade": 3
-        }
-      ]
-    },
-    {
-      "id": 10003,
-      "parent": 10002,
-      "name": "Stormcloud Pegasus",
-      "stats": [
-        {
-          "health": 7,
-          "upgrade": 0,
-          "fusion": 1
-        }
-      ]
-    },
-    {
-      "id": 10004,
-      "parent": 10003,
-      "stats": [
-        {
-          "health": 8,
-          "upgrade": 1
-        }
-      ]
-    },
-    {
-      "id": 10005,
-      "parent": 10004,
-      "stats": [
-        {
-          "attack": 2,
-          "upgrade": 2
-        }
-      ]
-    },
-    {
-      "id": 10006,
-      "parent": 10005,
-      "name": "Astral Pegasus",
-      "stats": [
-        {
-          "health": 9,
-          "upgrade": 0,
-          "fusion": 2
-        }
-      ]
-    },
-    {
-      "id": 10007,
-      "parent": 10006,
-      "stats": [
-        {
-          "health": 10,
-          "upgrade": 1
-        }
-      ]
-    },
-    {
-      "id": 10008,
-      "parent": 10007,
-      "stats": [
-        {
-          "upgrade": 2
+          "attack": true,
+          "heal": {
+            "modifier": "aether",
+            "value": [
+              [ 0 ],
+              [ 0 ],
+              [ 0, 0, 1 ]
+            ]
+          }
         }
       ]
     }
